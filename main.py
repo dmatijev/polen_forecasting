@@ -12,9 +12,9 @@ n_layers = 1 # number of lstm layers
 
 batch_size = 1
 seq_len = 3 # input sequence lenght
-epochs = 2
+epochs = 400
 
-lr=0.005
+lr_rate=0.000001
 
 
 is_cuda = torch.cuda.is_available()
@@ -27,12 +27,22 @@ else:
 class Net(nn.Module):
     def __init__(self, input_dim, drop_prob = 0.0):
         super(Net, self).__init__()
-        self.lstm = nn.LSTM(input_dim, hidden_dim, n_layers, dropout = drop_prob, batch_first=True)
+        self.lstm = nn.LSTM(input_dim, hidden_dim, n_layers, batch_first=True)
+        self.fc = nn.Linear(hidden_dim, 1)
+        self.sigmoid = nn.Sigmoid()
+        self.dropout = nn.Dropout(drop_prob)
         
     def forward(self, x, hidden):
         # just run the encoder, for a moment... Will fix that later and attach some decoder to it!
-        lstm_out, hidden = self.lstm(x, hidden)
-        return lstm_out
+
+     
+        all_hidden_states, hidden = self.lstm(x)#, hidden)
+        lstm_out = hidden[0].contiguous().view(-1, hidden_dim) # take only last hidden state
+        out = self.sigmoid(lstm_out) # not sure we need this
+        out = self.dropout(lstm_out)
+        out = self.fc(out)
+        
+        return out
         
     def init_hidden(self, batch_size):
         weight = next(self.parameters()).data
@@ -42,30 +52,53 @@ class Net(nn.Module):
 
 
 
-def train(model, train_loader, loss_fn, optimizer):
+def train(model, train_loader, valid_loader, test_loader, loss_fn, optimizer):
 
-    model.train()
+    
     clip = 5
-    import pdb
-   
     for i in range(epochs):
+        train_epoch_loss = 0
+        
+        model.train()
         h = model.init_hidden(batch_size)
         for (inputs, labels) in train_loader:
-            pdb.set_trace()
             inputs, labels = inputs.to(device), labels.to(device)
-            
+
             model.zero_grad()
-             
-            output, h = model(inputs, h)
-            loss = loss_fn(output.squeeze(), labels.float())
+            
+            output = model(inputs, h)
+
+            loss = loss_fn(output.squeeze(), labels.squeeze())
+
             loss.backward()
             nn.utils.clip_grad_norm_(model.parameters(), clip)
-            
-                 
             optimizer.step()
-            # TODO ongoing work... 
+            train_epoch_loss += loss.detach()
+        print(f"Epoch {i}: total TRAIN loss: {train_epoch_loss/len(train_loader)}")
+        
+        # validate the current model
+        model.eval()       
+        valid_epoch_loss = 0
+        for (inputs, labels) in valid_loader:
 
+            inputs, labels = inputs.to(device), labels.to(device)            
+            output = model(inputs, h)
+            loss = loss_fn(output.squeeze(), labels.squeeze())                      
+            valid_epoch_loss += loss.detach()
+            
+        print(f"Epoch {i}: total VALID loss: {valid_epoch_loss/len(valid_loader)}")
+        
+        # test the current model 
+        test_epoch_loss = 0
+        for (inputs, labels) in test_loader:
 
+            inputs, labels = inputs.to(device), labels.to(device)            
+            output = model(inputs, h)
+            loss = loss_fn(output.squeeze(), labels.squeeze())                      
+            test_epoch_loss += loss.detach()
+            
+        print(f"Epoch {i}: total TEST loss: {test_epoch_loss/len(test_loader)}")
+        print("_______________________________")
 
 if __name__ == "__main__":
     
@@ -92,15 +125,15 @@ if __name__ == "__main__":
     test_loader = DataLoader(test_dataset, shuffle=True, batch_size=batch_size)
     
          
-    model = Net(input_dim)
+    model = Net(input_dim,  drop_prob = 0)
     model.to(device)
-    loss = nn.BCELoss() # not sure whether this loss will work for our problem
+    loss_fn = nn.MSELoss(reduction='sum') # squared error loss
 
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr_rate)
     
     
     
-    train(model, train_loader, loss, optimizer)
+    train(model, train_loader, val_loader, test_loader, loss_fn, optimizer)
 
 
 

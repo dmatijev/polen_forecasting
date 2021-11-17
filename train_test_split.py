@@ -56,13 +56,13 @@ def load_data(file_name):
     valid_dataset = valid_dataset[['MNT', 'PAD', 'VLZ', 'MBV', 'RBD', 'PRAM']]
     test_dataset = test_dataset[['MNT', 'PAD', 'VLZ', 'MBV', 'RBD', 'PRAM']]
     
-    train_dataset = normalize(train_dataset)
-    valid_dataset = normalize(valid_dataset)
-    test_dataset = normalize(test_dataset)
+    train_dataset = normalize(train_dataset).reset_index()
+    valid_dataset = normalize(valid_dataset).reset_index()
+    test_dataset = normalize(test_dataset).reset_index()
     
     
     return train_dataset, valid_dataset, test_dataset
 
 
-
-train_dataset, valid_dataset, test_dataset = load_data('real_for_all_podaci.csv')
+if __name__ == "__main__":
+    train_dataset, valid_dataset, test_dataset = load_data('real_for_all_podaci.csv')
