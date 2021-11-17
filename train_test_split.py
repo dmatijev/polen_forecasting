@@ -7,7 +7,7 @@ Created on Tue Nov 16 16:40:36 2021
 
 import pandas as pd
 
-data = pd.read_csv('real_for_all_podaci.csv')
+
 
 def train_test_split(data, target, locations = ['NS'], test_seasons = [2015,2016]):  
     data = data[data['LOK'].isin(locations)]
@@ -25,9 +25,13 @@ def train_test_split(data, target, locations = ['NS'], test_seasons = [2015,2016
 #  TEST SET: 2016-2017
 # TARGET: PRAM (AMBROZIJA)
 
-trainvalid_dataset, test_dataset = train_test_split(data, 'PRAM', locations = ['NS'], test_seasons=[2016,2017])
-train_dataset, valid_dataset = train_test_split(trainvalid_dataset, 'PRAM', locations = ['NS'], test_seasons = [2014,2015])
 
-train_dataset = train_dataset[['MNT', 'PAD', 'VLZ', 'MBV', 'RBD', 'PRAM']]
-valid_dataset = valid_dataset[['MNT', 'PAD', 'VLZ', 'MBV', 'RBD', 'PRAM']]
-test_dataset = test_dataset[['MNT', 'PAD', 'VLZ', 'MBV', 'RBD', 'PRAM']]
+def load_data(file_name):
+    data = pd.read_csv(file_name)
+    trainvalid_dataset, test_dataset = train_test_split(data, 'PRAM', locations = ['NS'], test_seasons=[2016,2017])
+    train_dataset, valid_dataset = train_test_split(trainvalid_dataset, 'PRAM', locations = ['NS'], test_seasons = [2014,2015])
+
+    train_dataset = train_dataset[['MNT', 'PAD', 'VLZ', 'MBV', 'RBD', 'PRAM']]
+    valid_dataset = valid_dataset[['MNT', 'PAD', 'VLZ', 'MBV', 'RBD', 'PRAM']]
+    test_dataset = test_dataset[['MNT', 'PAD', 'VLZ', 'MBV', 'RBD', 'PRAM']]
+    return train_dataset, valid_dataset, test_dataset

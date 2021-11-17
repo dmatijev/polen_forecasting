@@ -1,10 +1,12 @@
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
+from train_test_split import load_data
+from data_set import Dataset
 #import numpy as np
 
 # ugly to have it as globals, but don't care for now... 
-input_dim = 5 # input feature vector size
+#input_dim = 5 # input feature vector size
 hidden_dim = 10 # size of a hidden vector
 n_layers = 1 # number of lstm layers
 
@@ -23,7 +25,7 @@ else:
 
 
 class Net(nn.Module):
-    def __init__(self, drop_prob = 0.0):
+    def __init__(self, input_dim, drop_prob = 0.0):
         super(Net, self).__init__()
         self.lstm = nn.LSTM(input_dim, hidden_dim, n_layers, dropout = drop_prob, batch_first=True)
         
@@ -44,16 +46,22 @@ def train(model, train_loader, loss_fn, optimizer):
 
     model.train()
     clip = 5
+    import pdb
+   
     for i in range(epochs):
         h = model.init_hidden(batch_size)
-        
         for (inputs, labels) in train_loader:
+            pdb.set_trace()
             inputs, labels = inputs.to(device), labels.to(device)
+            
             model.zero_grad()
+             
             output, h = model(inputs, h)
             loss = loss_fn(output.squeeze(), labels.float())
             loss.backward()
             nn.utils.clip_grad_norm_(model.parameters(), clip)
+            
+                 
             optimizer.step()
             # TODO ongoing work... 
 
@@ -69,13 +77,22 @@ if __name__ == "__main__":
     #hidden = (hidden_state, cell_state)
     #(out, hidden) = lstm_layer(inp, hidden)
     
-    # Zamolit Slobu da mi priredi train_data, val_data i test_data (TODO)
-    train_loader = DataLoader(train_data, shuffle=True, batch_size=batch_size)
-    val_loader = DataLoader(val_data, shuffle=True, batch_size=batch_size)
-    test_loader = DataLoader(test_data, shuffle=True, batch_size=batch_size)
+    train_data, val_data, test_data = load_data('real_for_all_podaci.csv') 
     
-        
-    model = Net()
+    input_dim = train_data.shape[1]
+
+    train_dataset = Dataset(train_data, seq_len)
+    
+    val_dataset = Dataset(val_data, seq_len)
+    test_dataset = Dataset(test_data, seq_len)
+
+
+    train_loader = DataLoader(train_dataset, shuffle=True, batch_size=batch_size)
+    val_loader = DataLoader(val_dataset, shuffle=True, batch_size=batch_size)
+    test_loader = DataLoader(test_dataset, shuffle=True, batch_size=batch_size)
+    
+         
+    model = Net(input_dim)
     model.to(device)
     loss = nn.BCELoss() # not sure whether this loss will work for our problem
 
@@ -84,6 +101,7 @@ if __name__ == "__main__":
     
     
     train(model, train_loader, loss, optimizer)
+
 
 
 
