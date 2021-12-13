@@ -65,23 +65,23 @@ def load_data(file_name):
     valid_pram = valid_dataset['PRAM']
     test_pram = test_dataset['PRAM']
     
-    #train_dataset = train_dataset[['MNT', 'PAD', 'VLZ', 'MBV', 'RBD', 'PRAM']]
-    train_dataset = train_dataset[['MNT', 'PAD', 'VLZ', 'MBV', 'RBD']]
-    #valid_dataset = valid_dataset[['MNT', 'PAD', 'VLZ', 'MBV', 'RBD', 'PRAM']]
-    valid_dataset = valid_dataset[['MNT', 'PAD', 'VLZ', 'MBV', 'RBD']]
-    #test_dataset = test_dataset[['MNT', 'PAD', 'VLZ', 'MBV', 'RBD', 'PRAM']]
-    test_dataset = test_dataset[['MNT', 'PAD', 'VLZ', 'MBV', 'RBD']]
+    train_dataset = train_dataset[['MNT', 'PAD', 'VLZ', 'MBV', 'RBD', 'PRAM']]
+    #train_dataset = train_dataset[['MNT', 'PAD', 'VLZ', 'MBV', 'RBD']]
+    valid_dataset = valid_dataset[['MNT', 'PAD', 'VLZ', 'MBV', 'RBD', 'PRAM']]
+    #valid_dataset = valid_dataset[['MNT', 'PAD', 'VLZ', 'MBV', 'RBD']]
+    test_dataset = test_dataset[['MNT', 'PAD', 'VLZ', 'MBV', 'RBD', 'PRAM']]
+    #test_dataset = test_dataset[['MNT', 'PAD', 'VLZ', 'MBV', 'RBD']]
     
     
     #train_dataset = normalize(train_dataset).reset_index()
     #valid_dataset = normalize(valid_dataset).reset_index()
     #test_dataset = normalize(test_dataset).reset_index()
-    train_dataset = normalize(train_dataset)
-    valid_dataset = normalize(valid_dataset)
-    test_dataset = normalize(test_dataset)
-    train_dataset['PRAM'] = train_pram
-    valid_dataset['PRAM'] = valid_pram
-    test_dataset['PRAM'] = test_pram
+    train_dataset = normalize_stari(train_dataset)
+    valid_dataset = normalize_stari(valid_dataset)
+    test_dataset = normalize_stari(test_dataset)
+    #train_dataset['PRAM'] = train_pram
+    #valid_dataset['PRAM'] = valid_pram
+    #test_dataset['PRAM'] = test_pram
     train_dataset = train_dataset.reset_index()
     valid_dataset = valid_dataset.reset_index()
     test_dataset = test_dataset.reset_index()
