@@ -7,11 +7,11 @@ from data_set import Dataset
 
 # ugly to have it as globals, but don't care for now... 
 #input_dim = 5 # input feature vector size
-hidden_dim = 10 # size of a hidden vector
+hidden_dim = 100 # size of a hidden vector
 n_layers = 1 # number of lstm layers
 
 batch_size = 1
-seq_len = 3 # input sequence lenght
+seq_len = 7 # input sequence lenght
 epochs = 400
 
 lr_rate=0.000001
@@ -25,11 +25,11 @@ else:
 
 
 class Net(nn.Module):
-    def __init__(self, input_dim, drop_prob = 0.0):
+    def __init__(self, input_dim, drop_prob = 0.1):
         super(Net, self).__init__()
-        self.lstm = nn.LSTM(input_dim, hidden_dim, n_layers, batch_first=True)
+        self.lstm = nn.LSTM(input_dim, hidden_dim, n_layers, bias=True, batch_first=True)
         self.fc = nn.Linear(hidden_dim, 1)
-        self.sigmoid = nn.Sigmoid()
+        #self.sigmoid = nn.Sigmoid()
         self.dropout = nn.Dropout(drop_prob)
         
     def forward(self, x, hidden):
@@ -38,7 +38,7 @@ class Net(nn.Module):
      
         all_hidden_states, hidden = self.lstm(x)#, hidden)
         lstm_out = hidden[0].contiguous().view(-1, hidden_dim) # take only last hidden state
-        out = self.sigmoid(lstm_out) # not sure we need this
+        #out = self.sigmoid(lstm_out) # not sure we need this
         out = self.dropout(lstm_out)
         out = self.fc(out)
         
@@ -67,6 +67,10 @@ def train(model, train_loader, valid_loader, test_loader, loss_fn, optimizer):
             model.zero_grad()
             
             output = model(inputs, h)
+            print(inputs)
+            print(labels)
+            print(output)
+            print()
 
             loss = loss_fn(output.squeeze(), labels.squeeze())
 
@@ -83,13 +87,16 @@ def train(model, train_loader, valid_loader, test_loader, loss_fn, optimizer):
 
             inputs, labels = inputs.to(device), labels.to(device)            
             output = model(inputs, h)
+            #print(inputs)
+            #print(labels)
+            #print(output)
             loss = loss_fn(output.squeeze(), labels.squeeze())                      
             valid_epoch_loss += loss.detach()
             
         print(f"Epoch {i}: total VALID loss: {valid_epoch_loss/len(valid_loader)}")
         
         # test the current model 
-        test_epoch_loss = 0
+        """test_epoch_loss = 0
         for (inputs, labels) in test_loader:
 
             inputs, labels = inputs.to(device), labels.to(device)            
@@ -98,7 +105,7 @@ def train(model, train_loader, valid_loader, test_loader, loss_fn, optimizer):
             test_epoch_loss += loss.detach()
             
         print(f"Epoch {i}: total TEST loss: {test_epoch_loss/len(test_loader)}")
-        print("_______________________________")
+        print("_______________________________")"""
 
 if __name__ == "__main__":
     
@@ -127,7 +134,8 @@ if __name__ == "__main__":
          
     model = Net(input_dim,  drop_prob = 0)
     model.to(device)
-    loss_fn = nn.MSELoss(reduction='sum') # squared error loss
+    #loss_fn = nn.MSELoss(reduction='sum') # squared error loss
+    loss_fn = nn.L1Loss()
 
     optimizer = torch.optim.Adam(model.parameters(), lr=lr_rate)
     
