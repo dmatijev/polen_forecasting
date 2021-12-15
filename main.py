@@ -11,11 +11,12 @@ from model import Net
 #hidden_dim = 10 # size of a hidden vector
 #n_layers = 1 # number of lstm layers
 
-batch_size = 1
+batch_size = 100
 seq_len = 3 # input sequence lenght
-epochs = 200
+epochs = 100
 
-lr_rate=0.000001
+#lr_rate=0.000001
+lr_rate=0.001
 
 
 
@@ -84,7 +85,7 @@ if __name__ == "__main__":
     #hidden = (hidden_state, cell_state)
     #(out, hidden) = lstm_layer(inp, hidden)
     
-    train_data, val_data, test_data = load_data('real_for_all_podaci.csv') 
+    train_data, val_data, test_data = load_data('real_for_all_podaci.csv', preproc='lognormalize')
     
     input_dim = train_data.shape[1]
 
