@@ -76,9 +76,12 @@ def load_data(file_name):
     #train_dataset = normalize(train_dataset).reset_index()
     #valid_dataset = normalize(valid_dataset).reset_index()
     #test_dataset = normalize(test_dataset).reset_index()
-    train_dataset = normalize_stari(train_dataset)
-    valid_dataset = normalize_stari(valid_dataset)
-    test_dataset = normalize_stari(test_dataset)
+    #train_dataset = normalize_stari(train_dataset)
+    #valid_dataset = normalize_stari(valid_dataset)
+    #test_dataset = normalize_stari(test_dataset)
+    train_dataset = standardize(train_dataset)
+    valid_dataset = standardize(valid_dataset)
+    test_dataset = standardize(test_dataset)
     #train_dataset['PRAM'] = train_pram
     #valid_dataset['PRAM'] = valid_pram
     #test_dataset['PRAM'] = test_pram

@@ -11,11 +11,11 @@ from model import Net
 #hidden_dim = 10 # size of a hidden vector
 #n_layers = 1 # number of lstm layers
 
-batch_size = 1
+batch_size = 128
 seq_len = 3 # input sequence lenght
 epochs = 200
 
-lr_rate=0.000001
+lr_rate=0.0001
 
 
 
@@ -29,18 +29,18 @@ def train(model, train_loader, valid_loader, test_loader, loss_fn, optimizer, de
         train_epoch_loss = 0
         
         model.train()
-        h = model.init_hidden(batch_size, device)
+        #h = model.init_hidden(batch_size, device)
         for (inputs, labels) in train_loader:
             inputs, labels = inputs.to(device), labels.to(device)
 
             model.zero_grad()
             
-            output = model(inputs, h)
+            output = model(inputs)#, h)
             
             loss = loss_fn(output.squeeze(), labels.squeeze())
 
             loss.backward()
-            nn.utils.clip_grad_norm_(model.parameters(), clip)
+            #nn.utils.clip_grad_norm_(model.parameters(), clip)
             optimizer.step()
             train_epoch_loss += loss.detach()
         print(f"Epoch {i}: total TRAIN loss: {train_epoch_loss/len(train_loader)}")
@@ -51,12 +51,12 @@ def train(model, train_loader, valid_loader, test_loader, loss_fn, optimizer, de
         for (inputs, labels) in valid_loader:
 
             inputs, labels = inputs.to(device), labels.to(device)            
-            output = model(inputs, h)
+            output = model(inputs)#, h)
             loss = loss_fn(output.squeeze(), labels.squeeze())                      
             valid_epoch_loss += loss.detach()
             
         print(f"Epoch {i}: total VALID loss: {valid_epoch_loss/len(valid_loader)}")
-        torch.save(model.state_dict(), f'models/epoch_{i}-batch_size_{batch_size}-lr_{lr_rate}.weights')
+        torch.save(model.state_dict(), f'models/epoch_{i}-batch_size_{batch_size}-lr_{lr_rate}-hidd_dim_{model.hidden_dim}.weights')
         # test the current model 
         """test_epoch_loss = 0
         for (inputs, labels) in test_loader:
@@ -99,7 +99,7 @@ if __name__ == "__main__":
     test_loader = DataLoader(test_dataset, shuffle=True, batch_size=batch_size)
     
          
-    model = Net(input_dim,  hidden_dim = 10, drop_prob = 0)
+    model = Net(input_dim,  hidden_dim = 1028, drop_prob = 0)
     model.to(device)
     loss_fn = nn.MSELoss(reduction='sum') # squared error loss
     #loss_fn = nn.L1Loss()
