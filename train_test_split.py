@@ -26,7 +26,7 @@ def normalize_stari(dataset, d_min, d_max):
 
 
 def normalize(dataset, d_mean):
-    print(d_mean)
+    #print(d_mean)
     return dataset/d_mean
 
 def logarithm(dataset, train_dataset):
