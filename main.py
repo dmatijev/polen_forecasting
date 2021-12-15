@@ -49,7 +49,7 @@ def train(model, train_loader, valid_loader, test_loader, loss_fn, optimizer, sc
 
         scheduler.step(train_epoch_loss)
         
-        # validate the current model
+        # validate the current model (this should get encapsulated to its own function)
         model.eval()
         valid_epoch_loss = 0
         for (inputs, labels) in valid_loader:
@@ -107,7 +107,7 @@ if __name__ == "__main__":
     val_loader = DataLoader(val_dataset, shuffle=True, batch_size=batch_size)
     test_loader = DataLoader(test_dataset, shuffle=True, batch_size=batch_size)
  
-    model = Net(input_dim,  hidden_dim = 1028, drop_prob = 0)
+    model = Net(input_dim,  hidden_dim = 1028, seq_len = seq_len, attention = True)
 
     model.to(device)
     loss_fn = nn.MSELoss(reduction='sum') # squared error loss
