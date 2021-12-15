@@ -22,7 +22,7 @@ lr_rate=0.0001
 
 
 
-def train(model, train_loader, valid_loader, test_loader, loss_fn, optimizer, device):
+def train(model, train_loader, valid_loader, test_loader, loss_fn, optimizer, scheduler, device):
 
 
     clip = 5
@@ -47,6 +47,8 @@ def train(model, train_loader, valid_loader, test_loader, loss_fn, optimizer, de
             train_epoch_loss += loss.detach()
         print(f"Epoch {i}: total TRAIN loss: {train_epoch_loss/len(train_loader)}")
 
+        scheduler.step(train_epoch_loss)
+        
         # validate the current model
         model.eval()
         valid_epoch_loss = 0
@@ -58,7 +60,8 @@ def train(model, train_loader, valid_loader, test_loader, loss_fn, optimizer, de
 
             valid_epoch_loss += loss.detach()
 
-        print(f"Epoch {i}: total VALID loss: {valid_epoch_loss/len(valid_loader)}")
+        print(f"Epoch {i}: total VALID loss: {valid_epoch_loss/len(valid_loader)}")                
+        
         torch.save(model.state_dict(), f'models/epoch_{i}-batch_size_{batch_size}-lr_{lr_rate}-hidd_dim_{model.hidden_dim}.weights')
         # test the current model 
 
@@ -72,6 +75,8 @@ def train(model, train_loader, valid_loader, test_loader, loss_fn, optimizer, de
             
         print(f"Epoch {i}: total TEST loss: {test_epoch_loss/len(test_loader)}")
         print("_______________________________")"""
+        
+        
 
 if __name__ == "__main__":
 
@@ -109,7 +114,8 @@ if __name__ == "__main__":
     #loss_fn = nn.L1Loss()
 
     optimizer = torch.optim.Adam(model.parameters(), lr=lr_rate)
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=10, factor=.3, threshold=1e-4)
 
 
 
-    train(model, train_loader, val_loader, test_loader, loss_fn, optimizer, device=device)
+    train(model, train_loader, val_loader, test_loader, loss_fn, optimizer, scheduler, device=device)
