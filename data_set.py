@@ -8,10 +8,11 @@ import torch
 import torch.utils.data as data
 
 class Dataset(data.Dataset):
-    def __init__(self, reads, k):
+    def __init__(self, reads, k, target):
         super().__init__()
         self.reads = reads
         self.k = k
+        self.target = target
 
         
 
@@ -21,7 +22,7 @@ class Dataset(data.Dataset):
         # k_plet format is seq_len times input_dim
         
         k_plet = self.reads[index: index + self.k]
-        label = self.reads['PRAM'][index + self.k]
+        label = self.reads[self.target][index + self.k]
 
         return torch.tensor(k_plet.to_numpy(), dtype = torch.float32), torch.tensor(label, dtype = torch.float32)
 

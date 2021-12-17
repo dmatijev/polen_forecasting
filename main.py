@@ -22,10 +22,11 @@ lr_rate=0.0001
 
 
 
-def train(model, train_loader, valid_loader, test_loader, loss_fn, optimizer, scheduler, device):
+def train(model, train_loader, valid_loader, test_loader, loss_fn, optimizer, scheduler, device, target):
 
 
     clip = 5
+    bestLoss = 1e9
     for i in range(epochs):
         train_epoch_loss = 0
 
@@ -60,9 +61,13 @@ def train(model, train_loader, valid_loader, test_loader, loss_fn, optimizer, sc
 
             valid_epoch_loss += loss.detach()
 
-        print(f"Epoch {i}: total VALID loss: {valid_epoch_loss/len(valid_loader)}")                
+        print(f"Epoch {i}: total VALID loss: {valid_epoch_loss/len(valid_loader)}")
+        if valid_epoch_loss/len(valid_loader) < bestLoss:
+            print('best model found, saving...')
+            torch.save(model.state_dict(), f'models/{target}/batch_size_{batch_size}-lr_{lr_rate}-hidd_dim_{model.hidden_dim}_best.weights')
+            bestLoss = valid_epoch_loss/len(valid_loader)
         
-        torch.save(model.state_dict(), f'models/epoch_{i}-batch_size_{batch_size}-lr_{lr_rate}-hidd_dim_{model.hidden_dim}.weights')
+        torch.save(model.state_dict(), f'models/{target}/epoch_{i}-batch_size_{batch_size}-lr_{lr_rate}-hidd_dim_{model.hidden_dim}.weights')
         # test the current model 
 
         """test_epoch_loss = 0
@@ -79,6 +84,8 @@ def train(model, train_loader, valid_loader, test_loader, loss_fn, optimizer, sc
         
 
 if __name__ == "__main__":
+    
+    TARGET = 'PRBR'
 
     is_cuda = torch.cuda.is_available()
     if is_cuda:
@@ -93,14 +100,14 @@ if __name__ == "__main__":
     #hidden = (hidden_state, cell_state)
     #(out, hidden) = lstm_layer(inp, hidden)
 
-    train_data, val_data, test_data = load_data('real_for_all_podaci.csv', preproc='lognormalize')
+    train_data, val_data, test_data = load_data('real_for_all_podaci.csv', preproc='lognormalize', target=TARGET)
 
     input_dim = train_data.shape[1]
 
-    train_dataset = Dataset(train_data, seq_len)
+    train_dataset = Dataset(train_data, seq_len, TARGET)
 
-    val_dataset = Dataset(val_data, seq_len)
-    test_dataset = Dataset(test_data, seq_len)
+    val_dataset = Dataset(val_data, seq_len, TARGET)
+    test_dataset = Dataset(test_data, seq_len, TARGET)
 
 
     train_loader = DataLoader(train_dataset, shuffle=True, batch_size=batch_size)
@@ -118,4 +125,4 @@ if __name__ == "__main__":
 
 
 
-    train(model, train_loader, val_loader, test_loader, loss_fn, optimizer, scheduler, device=device)
+    train(model, train_loader, val_loader, test_loader, loss_fn, optimizer, scheduler, device=device, target=TARGET)

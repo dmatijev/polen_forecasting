@@ -60,13 +60,13 @@ def takeSeasons(dataset, target):
 
 
 
-def load_data(file_name, preproc = 'lognormalize' ):
+def load_data(file_name, preproc = 'lognormalize',target='PRAM'):
     data = pd.read_csv(file_name)
-    data = data[['MNT','MKT', 'PAD', 'VLZ', 'MBV', 'RBD', 'PRAM', 'GOD', 'LOK', 'MSC']]
+    data = data[['MNT','MKT', 'PAD', 'VLZ', 'MBV', 'RBD', target, 'GOD', 'LOK', 'MSC']]
     # pomaknuti temperaturu
     data[['MKT', 'MNT']] = (data[['MKT', 'MNT']] + 40)/90.0
-    trainvalid_dataset, test_dataset = train_test_split(data, 'PRAM', locations = ['NS'], test_years=[2015,2016])
-    train_dataset, valid_dataset = train_test_split(trainvalid_dataset, 'PRAM', locations = ['NS'], test_years = [2013,2014])
+    trainvalid_dataset, test_dataset = train_test_split(data, target, locations = ['NS'], test_years=[2015,2016])
+    train_dataset, valid_dataset = train_test_split(trainvalid_dataset, target, locations = ['NS'], test_years = [2013,2014])
 
 
     #train_dataset = takeSeasons(train_dataset, 'PRAM')
@@ -77,15 +77,15 @@ def load_data(file_name, preproc = 'lognormalize' ):
     #valid_pram = valid_dataset['PRAM']
     #test_pram = test_dataset['PRAM']
     train_dataset_mnt = train_dataset['MSC']
-    train_dataset = train_dataset[['MNT', 'MKT', 'PAD', 'VLZ', 'MBV', 'RBD', 'PRAM']]
+    train_dataset = train_dataset[['MNT', 'MKT', 'PAD', 'VLZ', 'MBV', 'RBD', target]]
 
     #train_dataset = train_dataset[['MNT', 'PAD', 'VLZ', 'MBV', 'RBD']]
     valid_dataset_mnt = valid_dataset['MSC']
-    valid_dataset = valid_dataset[['MNT','MKT', 'PAD', 'VLZ', 'MBV', 'RBD', 'PRAM']]
+    valid_dataset = valid_dataset[['MNT','MKT', 'PAD', 'VLZ', 'MBV', 'RBD', target]]
 
     #valid_dataset = valid_dataset[['MNT', 'PAD', 'VLZ', 'MBV', 'RBD']]
     test_dataset_mnt = test_dataset['MSC']
-    test_dataset = test_dataset[['MNT','MKT', 'PAD', 'VLZ', 'MBV', 'RBD', 'PRAM']]
+    test_dataset = test_dataset[['MNT','MKT', 'PAD', 'VLZ', 'MBV', 'RBD', target]]
 
     #test_dataset = test_dataset[['MNT', 'PAD', 'VLZ', 'MBV', 'RBD']]
 
@@ -114,21 +114,22 @@ def load_data(file_name, preproc = 'lognormalize' ):
     valid_dataset['MSC'] = valid_dataset_mnt
     test_dataset['MSC'] = test_dataset_mnt
 
-    train_dataset = takeSeasons(train_dataset, 'PRAM')
-    valid_dataset = takeSeasons(valid_dataset, 'PRAM')
-    test_dataset = takeSeasons(test_dataset, 'PRAM')
+    train_dataset = takeSeasons(train_dataset, target)
+    valid_dataset = takeSeasons(valid_dataset, target)
+    test_dataset = takeSeasons(test_dataset, target)
 
     train_dataset = train_dataset.reset_index()
     valid_dataset = valid_dataset.reset_index()
     test_dataset = test_dataset.reset_index()
 
-    train_dataset = train_dataset[['MNT', 'MKT', 'PAD', 'VLZ', 'MBV', 'RBD', 'PRAM']]
-    valid_dataset = valid_dataset[['MNT','MKT', 'PAD', 'VLZ', 'MBV', 'RBD', 'PRAM']]
-    test_dataset = test_dataset[['MNT','MKT', 'PAD', 'VLZ', 'MBV', 'RBD', 'PRAM']]
+    train_dataset = train_dataset[['MNT', 'MKT', 'PAD', 'VLZ', 'MBV', 'RBD', target]]
+    valid_dataset = valid_dataset[['MNT','MKT', 'PAD', 'VLZ', 'MBV', 'RBD', target]]
+    test_dataset = test_dataset[['MNT','MKT', 'PAD', 'VLZ', 'MBV', 'RBD', target]]
 
     
     return train_dataset, valid_dataset, test_dataset
 
 
 if __name__ == "__main__":
-    train_dataset, valid_dataset, test_dataset = load_data('real_for_all_podaci.csv')
+    TARGET = 'PRTR'
+    train_dataset, valid_dataset, test_dataset = load_data('real_for_all_podaci.csv', target)
