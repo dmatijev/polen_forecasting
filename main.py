@@ -13,14 +13,12 @@ from model import Net
 
 batch_size = 128
 
-seq_len = 3 # input sequence lenght
-epochs = 100
-lr_rate=0.0001
-
-
-
-
-
+seq_len = 28 # input sequence lenght
+epochs = 500
+lr_rate=0.02628962232820093
+hidd_dim = 32
+hidd_dim2 = 1024
+att = False
 
 def train(model, train_loader, valid_loader, test_loader, loss_fn, optimizer, scheduler, device, target):
 
@@ -64,10 +62,10 @@ def train(model, train_loader, valid_loader, test_loader, loss_fn, optimizer, sc
         print(f"Epoch {i}: total VALID loss: {valid_epoch_loss/len(valid_loader)}")
         if valid_epoch_loss/len(valid_loader) < bestLoss:
             print('best model found, saving...')
-            torch.save(model.state_dict(), f'models/{target}/batch_size_{batch_size}-lr_{lr_rate}-hidd_dim_{model.hidden_dim}_best.weights')
+            torch.save(model.state_dict(), f'models/{target}/batch_size_{batch_size}-lr_{lr_rate}-hidd_dim_{model.hidden_dim}-att_{att}_best.weights')
             bestLoss = valid_epoch_loss/len(valid_loader)
         
-        torch.save(model.state_dict(), f'models/{target}/epoch_{i}-batch_size_{batch_size}-lr_{lr_rate}-hidd_dim_{model.hidden_dim}.weights')
+        #torch.save(model.state_dict(), f'models/{target}/epoch_{i}-batch_size_{batch_size}-lr_{lr_rate}-hidd_dim_{model.hidden_dim}.weights')
         # test the current model 
 
         """test_epoch_loss = 0
@@ -114,10 +112,10 @@ if __name__ == "__main__":
     val_loader = DataLoader(val_dataset, shuffle=True, batch_size=batch_size)
     test_loader = DataLoader(test_dataset, shuffle=True, batch_size=batch_size)
  
-    model = Net(input_dim,  hidden_dim = 1028, seq_len = seq_len, attention = True)
+    model = Net(input_dim,  hidden_dim = hidd_dim, hidden_dim2 = hidd_dim2, seq_len = seq_len, attention = att)
 
     model.to(device)
-    loss_fn = nn.MSELoss(reduction='sum') # squared error loss
+    loss_fn = nn.MSELoss(reduction='mean') # squared error loss
     #loss_fn = nn.L1Loss()
 
     optimizer = torch.optim.Adam(model.parameters(), lr=lr_rate)

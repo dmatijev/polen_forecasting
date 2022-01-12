@@ -13,13 +13,12 @@ class Attention(nn.Module):
         return self.v(states_reshaped)
         
 
-
 class Net(nn.Module):
-    def __init__(self, input_dim, hidden_dim, seq_len, n_layers=1, attention = False):
+    def __init__(self, input_dim, hidden_dim, hidden_dim2, seq_len, n_layers=1, attention = False):
         super(Net, self).__init__()
         self.lstm = nn.LSTM(input_size = input_dim, hidden_size = hidden_dim, num_layers = n_layers, bias=True, batch_first=True)
-        self.fc1 = nn.Linear(hidden_dim, hidden_dim)
-        self.fc = nn.Linear(hidden_dim, 1)
+        self.fc1 = nn.Linear(hidden_dim, hidden_dim2)
+        self.fc = nn.Linear(hidden_dim2, 1)
         self.sigmoid = nn.Sigmoid()
         self.n_layers = n_layers
         self.hidden_dim = hidden_dim
