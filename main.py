@@ -13,12 +13,12 @@ from model import Net
 
 batch_size = 128
 
-seq_len = 28 # input sequence lenght
+seq_len = 5 # input sequence lenght
 epochs = 500
-lr_rate=0.02628962232820093
+lr_rate=0.0001628962232820093
 hidd_dim = 32
 hidd_dim2 = 1024
-att = False
+att = True
 
 def train(model, train_loader, valid_loader, test_loader, loss_fn, optimizer, scheduler, device, target):
 
@@ -84,6 +84,8 @@ def train(model, train_loader, valid_loader, test_loader, loss_fn, optimizer, sc
 if __name__ == "__main__":
     
     TARGET = 'PRBR'
+    #TARGET = 'PRAM'
+    #TARGET = 'PRTR'
 
     is_cuda = torch.cuda.is_available()
     if is_cuda:
