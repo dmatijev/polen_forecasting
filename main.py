@@ -19,6 +19,7 @@ lr_rate=0.0001628962232820093
 hidd_dim = 32
 hidd_dim2 = 1024
 att = True
+nr_days = 1 # number of forcasting days
 
 def train(model, train_loader, valid_loader, test_loader, loss_fn, optimizer, scheduler, device, target):
 
@@ -36,7 +37,6 @@ def train(model, train_loader, valid_loader, test_loader, loss_fn, optimizer, sc
             model.zero_grad()
 
             output = model(inputs)#, h)
-            
 
             loss = loss_fn(output.squeeze(), labels.squeeze())
 
@@ -52,7 +52,6 @@ def train(model, train_loader, valid_loader, test_loader, loss_fn, optimizer, sc
         model.eval()
         valid_epoch_loss = 0
         for (inputs, labels) in valid_loader:
-
             inputs, labels = inputs.to(device), labels.to(device)            
             output = model(inputs)#, h)
             loss = loss_fn(output.squeeze(), labels.squeeze())                      
@@ -102,19 +101,21 @@ if __name__ == "__main__":
 
     train_data, val_data, test_data = load_data('real_for_all_podaci.csv', preproc='lognormalize', target=TARGET)
 
+  
+    
     input_dim = train_data.shape[1]
 
-    train_dataset = Dataset(train_data, seq_len, TARGET)
+    train_dataset = Dataset(train_data, seq_len, nr_days, TARGET)
 
-    val_dataset = Dataset(val_data, seq_len, TARGET)
-    test_dataset = Dataset(test_data, seq_len, TARGET)
+    val_dataset = Dataset(val_data, seq_len, nr_days, TARGET)
+    test_dataset = Dataset(test_data, seq_len, nr_days, TARGET)
 
 
     train_loader = DataLoader(train_dataset, shuffle=True, batch_size=batch_size)
     val_loader = DataLoader(val_dataset, shuffle=True, batch_size=batch_size)
     test_loader = DataLoader(test_dataset, shuffle=True, batch_size=batch_size)
  
-    model = Net(input_dim,  hidden_dim = hidd_dim, hidden_dim2 = hidd_dim2, seq_len = seq_len, attention = att)
+    model = Net(input_dim,  hidden_dim = hidd_dim, hidden_dim2 = hidd_dim2, nr_days = nr_days, seq_len = seq_len, attention = att)
 
     model.to(device)
     loss_fn = nn.MSELoss(reduction='mean') # squared error loss
