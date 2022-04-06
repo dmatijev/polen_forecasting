@@ -42,9 +42,9 @@ if __name__ == "__main__":
         data.iloc[i, data_cols:data_cols + R] = np.random.normal(mu[0], sigma[0], R)
         
     
-    print(f"saving new datset to sim-{R}-{data_file}  ", end ="")
+    print(f"saving new datsets to sim-{R}-{data_file}  ", end ="")
     data.to_csv(f'sim-{R}-{data_file}', index=False)
-    print("Done!")
+    print("Enjoy!")
     
     #mu, sigma = num0, 0.1
     #s = np.random.normal(mu, sigma, R)
