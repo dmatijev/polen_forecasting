@@ -8,6 +8,7 @@ Created on Wed Apr  6 10:54:52 2022
 import numpy as np
 import pandas as pd
 import argparse
+import tqdm
 
 def get_parser():
     parser = argparse.ArgumentParser()
@@ -36,7 +37,8 @@ if __name__ == "__main__":
     for i in range(R):
         data[f'{i}-sim'] = 0
         
-    for i in range(data_rows):
+    print ("Simulating datasets... ")
+    for i in tqdm.tqdm(range(data_rows)):
         data.iloc[i, data_cols:data_cols + R] = np.random.normal(mu[0], sigma[0], R)
         
     
