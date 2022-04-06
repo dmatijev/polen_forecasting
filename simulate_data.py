@@ -31,7 +31,7 @@ if __name__ == "__main__":
     data_cols = data.shape[1]
     
     mu = np.zeros(data_rows)
-    sigma = np.random.rand(data_rows)
+    sigma = np.random.rand(data_rows) # simulate variances... for now... 
     
     for i in range(R):
         data[f'{i}-sim'] = 0
@@ -40,6 +40,9 @@ if __name__ == "__main__":
         data.iloc[i, data_cols:data_cols + R] = np.random.normal(mu[0], sigma[0], R)
         
     
+    print(f"saving new datset to sim-{R}-{data_file}  ", end ="")
     data.to_csv(f'sim-{R}-{data_file}', index=False)
+    print("Done!")
+    
     #mu, sigma = num0, 0.1
     #s = np.random.normal(mu, sigma, R)
