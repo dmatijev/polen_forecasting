@@ -23,9 +23,10 @@ class Dataset(data.Dataset):
         # k_plet format is seq_len times input_dim
         
         k_plet = self.reads[index: index + self.k]
+        l_plet = self.reads[index+self.k:index+self.k+self.nr_days]
         label = self.reads[self.target][index+self.k : index+self.k+self.nr_days]
 
-        return torch.tensor(k_plet.to_numpy(), dtype = torch.float32), torch.tensor(label.to_numpy(), dtype = torch.float32)
+        return torch.tensor(k_plet.to_numpy(), dtype = torch.float32), torch.tensor(l_plet.to_numpy(), dtype=torch.float32), torch.tensor(label.to_numpy(), dtype = torch.float32)
 
     def __len__(self):
         return len(self.reads) - self.k - self.nr_days

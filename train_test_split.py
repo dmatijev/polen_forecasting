@@ -60,9 +60,15 @@ def takeSeasons(dataset, target):
 
 
 
-def load_data(file_name, preproc = 'lognormalize',target='PRAM'):
+def load_data(file_name, preproc = 'lognormalize',target='PRAM', simulated=False, nr_datasets=2):
     data = pd.read_csv(file_name)
-    data = data[['MNT','MKT', 'PAD', 'VLZ', 'MBV', 'RBD', target, 'GOD', 'LOK', 'MSC']]
+    if simulated:
+        listOfColumns=['MNT','MKT', 'PAD', 'VLZ', 'MBV', 'RBD', 'GOD', 'LOK', 'MSC']
+        for nd in range(nr_datasets):
+            listOfColumns.append(f"{nd}-sim")
+        data = data[listOfColumns]
+    else:
+        data = data[['MNT','MKT', 'PAD', 'VLZ', 'MBV', 'RBD', target, 'GOD', 'LOK', 'MSC']]
     # pomaknuti temperaturu
     data[['MKT', 'MNT']] = (data[['MKT', 'MNT']] + 40)/90.0
     trainvalid_dataset, test_dataset = train_test_split(data, target, locations = ['NS'], test_years=[2015,2016])
@@ -76,18 +82,35 @@ def load_data(file_name, preproc = 'lognormalize',target='PRAM'):
     #train_pram = train_dataset['PRAM']
     #valid_pram = valid_dataset['PRAM']
     #test_pram = test_dataset['PRAM']
-    train_dataset_mnt = train_dataset['MSC']
-    train_dataset = train_dataset[['MNT', 'MKT', 'PAD', 'VLZ', 'MBV', 'RBD', target]]
+    
+    if simulated:
+        listOfColumns=['MNT','MKT', 'PAD', 'VLZ', 'MBV', 'RBD']
+        for nd in range(nr_datasets):
+            listOfColumns.append(f"{nd}-sim")
+        
+        train_dataset_mnt = train_dataset['MSC']
+        train_dataset = train_dataset[listOfColumns]
 
-    #train_dataset = train_dataset[['MNT', 'PAD', 'VLZ', 'MBV', 'RBD']]
-    valid_dataset_mnt = valid_dataset['MSC']
-    valid_dataset = valid_dataset[['MNT','MKT', 'PAD', 'VLZ', 'MBV', 'RBD', target]]
+        #train_dataset = train_dataset[['MNT', 'PAD', 'VLZ', 'MBV', 'RBD']]
+        valid_dataset_mnt = valid_dataset['MSC']
+        valid_dataset = valid_dataset[listOfColumns]
 
-    #valid_dataset = valid_dataset[['MNT', 'PAD', 'VLZ', 'MBV', 'RBD']]
-    test_dataset_mnt = test_dataset['MSC']
-    test_dataset = test_dataset[['MNT','MKT', 'PAD', 'VLZ', 'MBV', 'RBD', target]]
+        #valid_dataset = valid_dataset[['MNT', 'PAD', 'VLZ', 'MBV', 'RBD']]
+        test_dataset_mnt = test_dataset['MSC']
+        test_dataset = test_dataset[listOfColumns]
+    else:
+        train_dataset_mnt = train_dataset['MSC']
+        train_dataset = train_dataset[['MNT', 'MKT', 'PAD', 'VLZ', 'MBV', 'RBD', target]]
 
-    #test_dataset = test_dataset[['MNT', 'PAD', 'VLZ', 'MBV', 'RBD']]
+        #train_dataset = train_dataset[['MNT', 'PAD', 'VLZ', 'MBV', 'RBD']]
+        valid_dataset_mnt = valid_dataset['MSC']
+        valid_dataset = valid_dataset[['MNT','MKT', 'PAD', 'VLZ', 'MBV', 'RBD', target]]
+
+        #valid_dataset = valid_dataset[['MNT', 'PAD', 'VLZ', 'MBV', 'RBD']]
+        test_dataset_mnt = test_dataset['MSC']
+        test_dataset = test_dataset[['MNT','MKT', 'PAD', 'VLZ', 'MBV', 'RBD', target]]
+
+        #test_dataset = test_dataset[['MNT', 'PAD', 'VLZ', 'MBV', 'RBD']]
 
 
     train_min = train_dataset.min()
@@ -121,15 +144,25 @@ def load_data(file_name, preproc = 'lognormalize',target='PRAM'):
     train_dataset = train_dataset.reset_index()
     valid_dataset = valid_dataset.reset_index()
     test_dataset = test_dataset.reset_index()
-
-    train_dataset = train_dataset[['MNT', 'MKT', 'PAD', 'VLZ', 'MBV', 'RBD', target]]
-    valid_dataset = valid_dataset[['MNT','MKT', 'PAD', 'VLZ', 'MBV', 'RBD', target]]
-    test_dataset = test_dataset[['MNT','MKT', 'PAD', 'VLZ', 'MBV', 'RBD', target]]
+    
+    
+    if simulated:
+        listOfColumns=['MNT','MKT', 'PAD', 'VLZ', 'MBV', 'RBD']
+        for nd in range(nr_datasets):
+            listOfColumns.append(f"{nd}-sim")
+        train_dataset = train_dataset[listOfColumns]
+        valid_dataset = valid_dataset[listOfColumns]
+        test_dataset = test_dataset[listOfColumns]
+    else:
+        train_dataset = train_dataset[['MNT', 'MKT', 'PAD', 'VLZ', 'MBV', 'RBD', target]]
+        valid_dataset = valid_dataset[['MNT','MKT', 'PAD', 'VLZ', 'MBV', 'RBD', target]]
+        test_dataset = test_dataset[['MNT','MKT', 'PAD', 'VLZ', 'MBV', 'RBD', target]]
 
     
     return train_dataset, valid_dataset, test_dataset
 
 
 if __name__ == "__main__":
-    TARGET = 'PRTR'
-    train_dataset, valid_dataset, test_dataset = load_data('real_for_all_podaci.csv', target)
+    TARGET = 'PRAM'
+    #train_dataset, valid_dataset, test_dataset = load_data('real_for_all_podaci_novo.csv', target=TARGET)
+    train_dataset, valid_dataset, test_dataset = load_data('sim-2-real_for_all_podaci_novo.csv', TARGET, True, 2)

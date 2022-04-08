@@ -11,13 +11,13 @@ from model import Net
 #hidden_dim = 10 # size of a hidden vector
 #n_layers = 1 # number of lstm layers
 
-batch_size = 128
+batch_size = 32
 
-seq_len = 5 # input sequence lenght
+seq_len = 3 # input sequence lenght
 epochs = 500
-lr_rate=0.0001628962232820093
-hidd_dim = 32
-hidd_dim2 = 1024
+lr_rate=0.005
+hidd_dim = 512
+#hidd_dim2 = 1024
 att = True
 nr_days = 1 # number of forcasting days
 
@@ -31,12 +31,12 @@ def train(model, train_loader, valid_loader, test_loader, loss_fn, optimizer, sc
 
         model.train()
         #h = model.init_hidden(batch_size, device)
-        for (inputs, labels) in train_loader:
-            inputs, labels = inputs.to(device), labels.to(device)
+        for (inputs, meteo, labels) in train_loader:
+            inputs, meteo, labels = inputs.to(device), meteo.to(device), labels.to(device)
 
             model.zero_grad()
 
-            output = model(inputs)#, h)
+            output = model(inputs, meteo)#, h)
 
             loss = loss_fn(output.squeeze(), labels.squeeze())
 
@@ -51,9 +51,9 @@ def train(model, train_loader, valid_loader, test_loader, loss_fn, optimizer, sc
         # validate the current model (this should get encapsulated to its own function)
         model.eval()
         valid_epoch_loss = 0
-        for (inputs, labels) in valid_loader:
-            inputs, labels = inputs.to(device), labels.to(device)            
-            output = model(inputs)#, h)
+        for (inputs, meteo, labels) in valid_loader:
+            inputs, meteo, labels = inputs.to(device), meteo.to(device), labels.to(device)            
+            output = model(inputs, meteo)#, h)
             loss = loss_fn(output.squeeze(), labels.squeeze())                      
 
             valid_epoch_loss += loss.detach()
@@ -61,7 +61,7 @@ def train(model, train_loader, valid_loader, test_loader, loss_fn, optimizer, sc
         print(f"Epoch {i}: total VALID loss: {valid_epoch_loss/len(valid_loader)}")
         if valid_epoch_loss/len(valid_loader) < bestLoss:
             print('best model found, saving...')
-            torch.save(model.state_dict(), f'models/{target}/batch_size_{batch_size}-lr_{lr_rate}-hidd_dim_{model.hidden_dim}-att_{att}_best.weights')
+            torch.save(model.state_dict(), f'models/{target}/batch_size_{batch_size}-seq_len_{seq_len}-nr_days_{nr_days}-lr_{lr_rate}-hidd_dim_{hidd_dim}-att_{att}_best_meteo.weights')
             bestLoss = valid_epoch_loss/len(valid_loader)
         
         #torch.save(model.state_dict(), f'models/{target}/epoch_{i}-batch_size_{batch_size}-lr_{lr_rate}-hidd_dim_{model.hidden_dim}.weights')
@@ -82,8 +82,8 @@ def train(model, train_loader, valid_loader, test_loader, loss_fn, optimizer, sc
 
 if __name__ == "__main__":
     
-    TARGET = 'PRBR'
-    #TARGET = 'PRAM'
+    #TARGET = 'PRBR'
+    TARGET = 'PRAM'
     #TARGET = 'PRTR'
 
     is_cuda = torch.cuda.is_available()
@@ -99,7 +99,7 @@ if __name__ == "__main__":
     #hidden = (hidden_state, cell_state)
     #(out, hidden) = lstm_layer(inp, hidden)
 
-    train_data, val_data, test_data = load_data('real_for_all_podaci.csv', preproc='lognormalize', target=TARGET)
+    train_data, val_data, test_data = load_data('real_for_all_podaci_novo.csv', preproc='lognormalize', target=TARGET)
 
   
     
@@ -115,7 +115,8 @@ if __name__ == "__main__":
     val_loader = DataLoader(val_dataset, shuffle=True, batch_size=batch_size)
     test_loader = DataLoader(test_dataset, shuffle=True, batch_size=batch_size)
  
-    model = Net(input_dim,  hidden_dim = hidd_dim, hidden_dim2 = hidd_dim2, nr_days = nr_days, seq_len = seq_len, attention = att)
+    #model = Net(input_dim,  hidden_dim = hidd_dim, hidden_dim2 = hidd_dim2, nr_days = nr_days, seq_len = seq_len, attention = att)
+    model = Net(input_dim,  hidden_dim = hidd_dim, nr_days = nr_days, seq_len = seq_len, attention = att)
 
     model.to(device)
     loss_fn = nn.MSELoss(reduction='mean') # squared error loss
