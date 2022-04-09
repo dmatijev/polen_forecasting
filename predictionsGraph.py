@@ -1,6 +1,6 @@
 from matplotlib import pyplot as plt
     
-def predictionsGraph(values, labels):
+def predictionsGraph(values, labels, target):
     """(list of lists, list of strings) -> NoneType
     values - lista kojoj su elementi liste s vrijednostima koje treba nacrtati; npr. prva lista su
     stvarne vrijednosti, druga lista su predikcije dobivene LSTM-om itd.
@@ -9,11 +9,11 @@ def predictionsGraph(values, labels):
     plt.clf()
     for i in range(len(labels)):
         plt.plot(range(1,len(values[i])+1),values[i], label=labels[i], color=colors[i])
-    plt.title('Prikaz stvarne i predviđene PRAM po danima')
+    plt.title(f'Prikaz stvarne i predviđene {target} po danima')
     plt.legend()
     plt.show()
     
-def predictionsGraphScatter(values, labels):
+def predictionsGraphScatter(values, labels, target):
     """(list of lists, list of strings) -> NoneType
     values - lista kojoj su elementi liste s vrijednostima koje treba nacrtati; npr. prva lista su
     stvarne vrijednosti, druga lista su predikcije dobivene LSTM-om itd.
@@ -23,6 +23,6 @@ def predictionsGraphScatter(values, labels):
     plt.clf()
     for i in range(len(labels)):
         plt.scatter(range(1,len(values[i])+1),values[i], label=labels[i], color=colors[i], marker=markers[i])
-    plt.title('Prikaz stvarne i predviđene PRAM po danima')
+    plt.title(f'Prikaz stvarne i predviđene {target} po danima')
     plt.legend()
     plt.show()
