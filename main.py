@@ -109,15 +109,17 @@ if __name__ == "__main__":
 
 
     train_loader = DataLoader(train_dataset, shuffle=True, batch_size=batch_size)
-    val_loader = DataLoader(val_dataset, shuffle=True, batch_size=batch_size)
-    test_loader = DataLoader(test_dataset, shuffle=True, batch_size=batch_size)
+    val_loader = DataLoader(val_dataset, shuffle=False, batch_size=batch_size)
+    test_loader = DataLoader(test_dataset, shuffle=False, batch_size=batch_size)
  
+    
     #model = Net(input_dim,  hidden_dim = hidd_dim, hidden_dim2 = hidd_dim2, nr_days = nr_days, seq_len = seq_len, attention = att)
     model = Net(input_dim,  hidden_dim = hidd_dim, nr_days = nr_days, seq_len = seq_len, attention = att, device = device)
 
     model.to(device)
-    loss_fn = nn.MSELoss(reduction='mean') # squared error loss
-    #loss_fn = weighted_mse_loss(torch.tensor(weights).to(device), reduction='mean')
+    
+    #loss_fn = nn.MSELoss(reduction='mean') # squared error loss
+    loss_fn = weighted_mse_loss(torch.tensor(weights).to(device), reduction='mean')
 
     optimizer = torch.optim.Adam(model.parameters(), lr=lr_rate)
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=10, factor=.3, threshold=1e-4)
