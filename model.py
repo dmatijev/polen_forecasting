@@ -15,7 +15,7 @@ class Attention(nn.Module):
 
 class Net(nn.Module):
     #def __init__(self, input_dim, hidden_dim, hidden_dim2, seq_len, nr_days = 1, n_layers=1, attention = False):
-    def __init__(self, input_dim, hidden_dim, seq_len, nr_days = 1, n_layers=1, attention = False):
+    def __init__(self, input_dim, hidden_dim, seq_len, nr_days = 1, n_layers=1, attention = False, device = torch.device("cpu")):
         super(Net, self).__init__()
         self.lstm = nn.LSTM(input_size = input_dim, hidden_size = hidden_dim, num_layers = n_layers, bias=True, batch_first=True)
         #self.fc1 = nn.Linear(hidden_dim, hidden_dim2)
@@ -30,6 +30,7 @@ class Net(nn.Module):
         self.use_attention_layer = attention
         self.attention = Attention(seq_len)
         self.nr_days = nr_days
+        self.device = device
         
     def forward(self, x, meteo):# hidden):    
         all_hidden_states, hidden = self.lstm(x)#, hidden)
@@ -48,7 +49,7 @@ class Net(nn.Module):
         #cx = torch.zeros(encoder_out.shape[0], self.hidden_dim2).to('cuda')
         
         hx = encoder_out
-        cx = torch.zeros(encoder_out.shape).to('cuda')
+        cx = torch.zeros(encoder_out.shape).to(self.device)
         out = []
         for i in range(self.nr_days): # start decoding
             #hx, cx = self.lstm_cell(encoder_out, (hx, cx))

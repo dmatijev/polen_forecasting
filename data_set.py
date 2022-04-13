@@ -7,6 +7,16 @@ Created on Wed Nov 17 09:36:55 2021
 import torch
 import torch.utils.data as data
 
+
+
+def weighted_mse_loss(weights, reduction):
+    if reduction == 'mean':
+        return lambda input, target: (weights * (input - target) ** 2).mean()
+    elif reduction == 'sum':
+        return lambda input, target: (weights * (input - target) ** 2).sum()
+    else:
+        raise ValueError("reduction flag should be set to either 'mean' or 'sum' ")
+
 class Dataset(data.Dataset):
     def __init__(self, reads, k, nr_days, target):
         super().__init__()
@@ -15,7 +25,6 @@ class Dataset(data.Dataset):
         self.nr_days = nr_days
         self.target = target
 
-        
 
     def __getitem__(self, index):
         # implement taking k-plets at index position. Label is the polen 

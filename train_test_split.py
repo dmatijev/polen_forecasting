@@ -58,7 +58,6 @@ def takeSeasons(dataset, target):
 # TARGET: PRAM (AMBROZIJA)
 
 
-
 def load_data(file_name, preproc = 'lognormalize',target='PRAM', nr_sim = 0):
     data = pd.read_csv(file_name)
     if nr_sim > 0:
@@ -158,7 +157,9 @@ def load_data(file_name, preproc = 'lognormalize',target='PRAM', nr_sim = 0):
         test_dataset = test_dataset[['MNT','MKT', 'PAD', 'VLZ', 'MBV', 'RBD', target]]
 
     
-    return train_dataset, valid_dataset, test_dataset
+    weights = np.ones(train_dataset.shape[0]) # TODO, load_data shold return weights (variances) as well!!!
+    
+    return train_dataset, valid_dataset, test_dataset, weights
 
 
 if __name__ == "__main__":

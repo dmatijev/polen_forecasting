@@ -3,13 +3,11 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 from train_test_split import load_data
 from data_set import Dataset
+from data_set import  weighted_mse_loss
 #import numpy as np
 from model import Net
 
 # ugly to have it as globals, but don't care for now...
-#input_dim = 5 # input feature vector size
-#hidden_dim = 10 # size of a hidden vector
-#n_layers = 1 # number of lstm layers
 
 batch_size = 1 # batch size should always be fixed to 1
 
@@ -77,7 +75,8 @@ def train(model, train_loader, valid_loader, test_loader, loss_fn, optimizer, sc
         print(f"Epoch {i}: total TEST loss: {test_epoch_loss/len(test_loader)}")
         print("_______________________________")"""
         
-        
+    
+
 
 if __name__ == "__main__":
     
@@ -98,7 +97,8 @@ if __name__ == "__main__":
     #hidden = (hidden_state, cell_state)
     #(out, hidden) = lstm_layer(inp, hidden)
 
-    train_data, val_data, test_data = load_data('sim-10-real_for_all_podaci.csv', preproc='lognormalize', target=TARGET, nr_sim = 10)
+    train_data, val_data, test_data, weights = load_data('sim-10-real_for_all_podaci.csv', preproc='lognormalize', target=TARGET, nr_sim = 0)
+    
     
     input_dim = train_data.shape[1]
 
@@ -113,11 +113,11 @@ if __name__ == "__main__":
     test_loader = DataLoader(test_dataset, shuffle=True, batch_size=batch_size)
  
     #model = Net(input_dim,  hidden_dim = hidd_dim, hidden_dim2 = hidd_dim2, nr_days = nr_days, seq_len = seq_len, attention = att)
-    model = Net(input_dim,  hidden_dim = hidd_dim, nr_days = nr_days, seq_len = seq_len, attention = att)
+    model = Net(input_dim,  hidden_dim = hidd_dim, nr_days = nr_days, seq_len = seq_len, attention = att, device = device)
 
     model.to(device)
     loss_fn = nn.MSELoss(reduction='mean') # squared error loss
-    #loss_fn = nn.L1Loss()
+    #loss_fn = weighted_mse_loss(torch.tensor(weights).to(device), reduction='mean')
 
     optimizer = torch.optim.Adam(model.parameters(), lr=lr_rate)
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=10, factor=.3, threshold=1e-4)
