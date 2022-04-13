@@ -39,7 +39,7 @@ if __name__ == "__main__":
         
     print ("Simulating datasets... ")
     for i in tqdm.tqdm(range(data_rows)):
-        data.iloc[i, data_cols:data_cols + R] = np.random.normal(mu[0], sigma[0], R)
+        data.iloc[i, data_cols:data_cols + R] = np.maximum(0, np.random.normal(mu[0], sigma[0], R))
         
     
     print(f"saving new datsets to sim-{R}-{data_file}  ", end ="")

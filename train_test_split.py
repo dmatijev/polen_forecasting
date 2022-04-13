@@ -24,7 +24,6 @@ def normalize_stari(dataset, d_min, d_max):
     return (dataset - d_min)/(d_max - d_min)
 
 
-
 def normalize(dataset, d_mean):
     #print(d_mean)
     return dataset/d_mean
@@ -60,11 +59,11 @@ def takeSeasons(dataset, target):
 
 
 
-def load_data(file_name, preproc = 'lognormalize',target='PRAM', simulated=False, nr_datasets=2):
+def load_data(file_name, preproc = 'lognormalize',target='PRAM', nr_sim = 0):
     data = pd.read_csv(file_name)
-    if simulated:
+    if nr_sim > 0:
         listOfColumns=['MNT','MKT', 'PAD', 'VLZ', 'MBV', 'RBD', 'GOD', 'LOK', 'MSC']
-        for nd in range(nr_datasets):
+        for nd in range(nr_sim):
             listOfColumns.append(f"{nd}-sim")
         data = data[listOfColumns]
     else:
@@ -83,9 +82,9 @@ def load_data(file_name, preproc = 'lognormalize',target='PRAM', simulated=False
     #valid_pram = valid_dataset['PRAM']
     #test_pram = test_dataset['PRAM']
     
-    if simulated:
+    if nr_sim > 0:
         listOfColumns=['MNT','MKT', 'PAD', 'VLZ', 'MBV', 'RBD']
-        for nd in range(nr_datasets):
+        for nd in range(nr_sim):
             listOfColumns.append(f"{nd}-sim")
         
         train_dataset_mnt = train_dataset['MSC']
@@ -146,9 +145,9 @@ def load_data(file_name, preproc = 'lognormalize',target='PRAM', simulated=False
     test_dataset = test_dataset.reset_index()
     
     
-    if simulated:
+    if nr_sim > 0:
         listOfColumns=['MNT','MKT', 'PAD', 'VLZ', 'MBV', 'RBD']
-        for nd in range(nr_datasets):
+        for nd in range(nr_sim):
             listOfColumns.append(f"{nd}-sim")
         train_dataset = train_dataset[listOfColumns]
         valid_dataset = valid_dataset[listOfColumns]

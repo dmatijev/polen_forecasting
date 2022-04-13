@@ -11,7 +11,7 @@ from model import Net
 #hidden_dim = 10 # size of a hidden vector
 #n_layers = 1 # number of lstm layers
 
-batch_size = 32
+batch_size = 1 # batch size should always be fixed to 1
 
 seq_len = 3 # input sequence lenght
 epochs = 500
@@ -24,7 +24,6 @@ nr_days = 1 # number of forcasting days
 def train(model, train_loader, valid_loader, test_loader, loss_fn, optimizer, scheduler, device, target):
 
 
-    clip = 5
     bestLoss = 1e9
     for i in range(epochs):
         train_epoch_loss = 0
@@ -99,9 +98,7 @@ if __name__ == "__main__":
     #hidden = (hidden_state, cell_state)
     #(out, hidden) = lstm_layer(inp, hidden)
 
-    train_data, val_data, test_data = load_data('real_for_all_podaci_novo.csv', preproc='lognormalize', target=TARGET)
-
-  
+    train_data, val_data, test_data = load_data('sim-10-real_for_all_podaci.csv', preproc='lognormalize', target=TARGET, nr_sim = 10)
     
     input_dim = train_data.shape[1]
 
