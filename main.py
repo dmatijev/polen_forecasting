@@ -9,7 +9,7 @@ from model import Net
 
 # ugly to have it as globals, but don't care for now...
 
-batch_size = 1 # batch size should always be fixed to 1
+batch_size = 32 
 
 seq_len = 3 # input sequence lenght
 epochs = 500
@@ -17,25 +17,36 @@ lr_rate=0.005
 hidd_dim = 512
 #hidd_dim2 = 1024
 att = True
-nr_days = 1 # number of forcasting days
+nr_days = 2 # number of forcasting days
+
+use_weights = False # MSE loss function either uses weights or it does not
+use_model = 'single_model_orig_data' # ['single_model_orig_data', 'multiple_models_sim_data', 'single_model_sim_data']
+
+if use_model == 'single_model_sim_data':
+    batch_size = 1 # since batch dimension in input tenzor will be used for multiple simulated inputs
+    
 
 def train(model, train_loader, valid_loader, test_loader, loss_fn, optimizer, scheduler, device, target):
 
 
     bestLoss = 1e9
+    
+    
     for i in range(epochs):
         train_epoch_loss = 0
 
         model.train()
         #h = model.init_hidden(batch_size, device)
-        for (inputs, meteo, labels) in train_loader:
-            inputs, meteo, labels = inputs.to(device), meteo.to(device), labels.to(device)
+        for (inputs, meteo, labels, weights) in train_loader:
+            inputs, meteo, labels, weights= inputs.to(device), meteo.to(device), labels.to(device), weights.to(device)
 
             model.zero_grad()
 
+            
             output = model(inputs, meteo)#, h)
 
-            loss = loss_fn(output.squeeze(), labels.squeeze())
+
+            loss = loss_fn(output.squeeze(), labels.squeeze(), weights.squeeze())
 
             loss.backward()
             #nn.utils.clip_grad_norm_(model.parameters(), clip)
@@ -48,10 +59,10 @@ def train(model, train_loader, valid_loader, test_loader, loss_fn, optimizer, sc
         # validate the current model (this should get encapsulated to its own function)
         model.eval()
         valid_epoch_loss = 0
-        for (inputs, meteo, labels) in valid_loader:
-            inputs, meteo, labels = inputs.to(device), meteo.to(device), labels.to(device)            
+        for (inputs, meteo, labels, weights) in valid_loader:
+            inputs, meteo, labels, weights = inputs.to(device), meteo.to(device), labels.to(device), weights.to(device)          
             output = model(inputs, meteo)#, h)
-            loss = loss_fn(output.squeeze(), labels.squeeze())                      
+            loss = loss_fn(output.squeeze(), labels.squeeze(), weights.squeeze())                      
 
             valid_epoch_loss += loss.detach()
 
@@ -97,16 +108,16 @@ if __name__ == "__main__":
     #hidden = (hidden_state, cell_state)
     #(out, hidden) = lstm_layer(inp, hidden)
 
-    train_data, val_data, test_data, weights = load_data('sim-10-real_for_all_podaci.csv', preproc='lognormalize', target=TARGET, nr_sim = 0)
+    train_data, val_data, test_data = load_data('sim-10-real_for_all_podaci.csv', preproc='lognormalize', target=TARGET, nr_sim = 0, use_weights=use_weights)
     
     
-    input_dim = train_data.shape[1]
+    
 
     train_dataset = Dataset(train_data, seq_len, nr_days, TARGET)
     val_dataset = Dataset(val_data, seq_len, nr_days, TARGET)
     test_dataset = Dataset(test_data, seq_len, nr_days, TARGET)
 
-
+    input_dim = train_dataset[0][0].shape[1]
     train_loader = DataLoader(train_dataset, shuffle=True, batch_size=batch_size)
     val_loader = DataLoader(val_dataset, shuffle=False, batch_size=batch_size)
     test_loader = DataLoader(test_dataset, shuffle=False, batch_size=batch_size)
@@ -118,11 +129,13 @@ if __name__ == "__main__":
     model.to(device)
     
     #loss_fn = nn.MSELoss(reduction='mean') # squared error loss
-    loss_fn = weighted_mse_loss(torch.tensor(weights).to(device), reduction='mean')
+    loss_fn = weighted_mse_loss(reduction='mean') 
 
     optimizer = torch.optim.Adam(model.parameters(), lr=lr_rate)
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=10, factor=.3, threshold=1e-4)
 
-
-
     train(model, train_loader, val_loader, test_loader, loss_fn, optimizer, scheduler, device=device, target=TARGET)
+    
+    
+    
+    

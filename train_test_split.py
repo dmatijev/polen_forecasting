@@ -58,7 +58,7 @@ def takeSeasons(dataset, target):
 # TARGET: PRAM (AMBROZIJA)
 
 
-def load_data(file_name, preproc = 'lognormalize',target='PRAM', nr_sim = 0):
+def load_data(file_name, preproc = 'lognormalize',target='PRAM', nr_sim = 0, use_weights = False):
     data = pd.read_csv(file_name)
     if nr_sim > 0:
         listOfColumns=['MNT','MKT', 'PAD', 'VLZ', 'MBV', 'RBD', 'GOD', 'LOK', 'MSC']
@@ -156,10 +156,15 @@ def load_data(file_name, preproc = 'lognormalize',target='PRAM', nr_sim = 0):
         valid_dataset = valid_dataset[['MNT','MKT', 'PAD', 'VLZ', 'MBV', 'RBD', target]]
         test_dataset = test_dataset[['MNT','MKT', 'PAD', 'VLZ', 'MBV', 'RBD', target]]
 
+    if not use_weights: # all weights are set to 1
+        train_dataset['WGHT'] = pd.Series(np.ones(train_dataset.shape[0]))
+        valid_dataset['WGHT'] = pd.Series(np.ones(valid_dataset.shape[0]))
+        test_dataset['WGHT'] = pd.Series(np.ones(test_dataset.shape[0]))
+    else:
+        pass # TODO SLOBODAN, load_data shold return weights (variances) !!!
     
-    weights = np.ones(train_dataset.shape[0]) # TODO, load_data shold return weights (variances) as well!!!
-    
-    return train_dataset, valid_dataset, test_dataset, weights
+ 
+    return train_dataset, valid_dataset, test_dataset
 
 
 if __name__ == "__main__":

@@ -53,7 +53,7 @@ class Net(nn.Module):
         out = []
         for i in range(self.nr_days): # start decoding
             #hx, cx = self.lstm_cell(encoder_out, (hx, cx))
-            hx, cx = self.lstm_cell(meteo[:,i,:-1], (hx, cx))
+            hx, cx = self.lstm_cell(meteo[:,i,:], (hx, cx))
             out.append(self.fc(hx))
 
         return torch.cat(out, dim = 1)
