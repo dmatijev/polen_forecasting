@@ -103,7 +103,6 @@ if __name__ == "__main__":
     input_dim = train_data.shape[1]
 
     train_dataset = Dataset(train_data, seq_len, nr_days, TARGET)
-
     val_dataset = Dataset(val_data, seq_len, nr_days, TARGET)
     test_dataset = Dataset(test_data, seq_len, nr_days, TARGET)
 

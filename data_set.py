@@ -11,11 +11,11 @@ import torch.utils.data as data
 
 def weighted_mse_loss(weights, reduction):
     if reduction == 'mean':
-        return lambda input, target: (weights * (input - target) ** 2).mean()
+        return lambda _input, _label: (weights * (_input - _label) ** 2).mean()
     elif reduction == 'sum':
-        return lambda input, target: (weights * (input - target) ** 2).sum()
+        return lambda _input, _label: (weights * (_input - _label) ** 2).sum()
     else:
-        raise ValueError("reduction flag should be set to either 'mean' or 'sum' ")
+        raise Exception("reduction flag should be set to either 'mean' or 'sum' ")
 
 class Dataset(data.Dataset):
     def __init__(self, reads, k, nr_days, target):
