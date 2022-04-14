@@ -60,13 +60,13 @@ def takeSeasons(dataset, target):
 
 def load_data(file_name, preproc = 'lognormalize',target='PRAM', nr_sim = 0, use_weights = False):
     data = pd.read_csv(file_name)
+    listOfColumns=['MNT','MKT', 'PAD', 'VLZ', 'MBV', 'RBD', target,  'GOD', 'LOK', 'MSC']
     if nr_sim > 0:
-        listOfColumns=['MNT','MKT', 'PAD', 'VLZ', 'MBV', 'RBD', 'GOD', 'LOK', 'MSC']
         for nd in range(nr_sim):
             listOfColumns.append(f"{nd}-sim")
-        data = data[listOfColumns]
-    else:
-        data = data[['MNT','MKT', 'PAD', 'VLZ', 'MBV', 'RBD', target, 'GOD', 'LOK', 'MSC']]
+        
+    data = data[listOfColumns]
+    
     # pomaknuti temperaturu
     data[['MKT', 'MNT']] = (data[['MKT', 'MNT']] + 40)/90.0
     trainvalid_dataset, test_dataset = train_test_split(data, target, locations = ['NS'], test_years=[2015,2016])
@@ -81,35 +81,19 @@ def load_data(file_name, preproc = 'lognormalize',target='PRAM', nr_sim = 0, use
     #valid_pram = valid_dataset['PRAM']
     #test_pram = test_dataset['PRAM']
     
+    listOfColumns=['MNT','MKT', 'PAD', 'VLZ', 'MBV', 'RBD', target]
     if nr_sim > 0:
-        listOfColumns=['MNT','MKT', 'PAD', 'VLZ', 'MBV', 'RBD']
         for nd in range(nr_sim):
             listOfColumns.append(f"{nd}-sim")
-        
-        train_dataset_mnt = train_dataset['MSC']
-        train_dataset = train_dataset[listOfColumns]
+                
+    train_dataset_mnt = train_dataset['MSC']
+    train_dataset = train_dataset[listOfColumns]
 
-        #train_dataset = train_dataset[['MNT', 'PAD', 'VLZ', 'MBV', 'RBD']]
-        valid_dataset_mnt = valid_dataset['MSC']
-        valid_dataset = valid_dataset[listOfColumns]
+    valid_dataset_mnt = valid_dataset['MSC']
+    valid_dataset = valid_dataset[listOfColumns]
 
-        #valid_dataset = valid_dataset[['MNT', 'PAD', 'VLZ', 'MBV', 'RBD']]
-        test_dataset_mnt = test_dataset['MSC']
-        test_dataset = test_dataset[listOfColumns]
-    else:
-        train_dataset_mnt = train_dataset['MSC']
-        train_dataset = train_dataset[['MNT', 'MKT', 'PAD', 'VLZ', 'MBV', 'RBD', target]]
-
-        #train_dataset = train_dataset[['MNT', 'PAD', 'VLZ', 'MBV', 'RBD']]
-        valid_dataset_mnt = valid_dataset['MSC']
-        valid_dataset = valid_dataset[['MNT','MKT', 'PAD', 'VLZ', 'MBV', 'RBD', target]]
-
-        #valid_dataset = valid_dataset[['MNT', 'PAD', 'VLZ', 'MBV', 'RBD']]
-        test_dataset_mnt = test_dataset['MSC']
-        test_dataset = test_dataset[['MNT','MKT', 'PAD', 'VLZ', 'MBV', 'RBD', target]]
-
-        #test_dataset = test_dataset[['MNT', 'PAD', 'VLZ', 'MBV', 'RBD']]
-
+    test_dataset_mnt = test_dataset['MSC']
+    test_dataset = test_dataset[listOfColumns]
 
     train_min = train_dataset.min()
     train_max = train_dataset.max()
@@ -143,18 +127,13 @@ def load_data(file_name, preproc = 'lognormalize',target='PRAM', nr_sim = 0, use
     valid_dataset = valid_dataset.reset_index()
     test_dataset = test_dataset.reset_index()
     
-    
+    listOfColumns=['MNT','MKT', 'PAD', 'VLZ', 'MBV', 'RBD', target]    
     if nr_sim > 0:
-        listOfColumns=['MNT','MKT', 'PAD', 'VLZ', 'MBV', 'RBD']
         for nd in range(nr_sim):
             listOfColumns.append(f"{nd}-sim")
-        train_dataset = train_dataset[listOfColumns]
-        valid_dataset = valid_dataset[listOfColumns]
-        test_dataset = test_dataset[listOfColumns]
-    else:
-        train_dataset = train_dataset[['MNT', 'MKT', 'PAD', 'VLZ', 'MBV', 'RBD', target]]
-        valid_dataset = valid_dataset[['MNT','MKT', 'PAD', 'VLZ', 'MBV', 'RBD', target]]
-        test_dataset = test_dataset[['MNT','MKT', 'PAD', 'VLZ', 'MBV', 'RBD', target]]
+    train_dataset = train_dataset[listOfColumns]
+    valid_dataset = valid_dataset[listOfColumns]
+    test_dataset = test_dataset[listOfColumns]
 
     if not use_weights: # all weights are set to 1
         train_dataset['WGHT'] = pd.Series(np.ones(train_dataset.shape[0]))
