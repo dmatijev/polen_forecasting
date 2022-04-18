@@ -26,7 +26,8 @@ class Dataset(data.Dataset):
     def __init__(self, reads, k, nr_days, target):
         super().__init__()
         self.reads = reads.drop(['WGHT'], axis=1)
-        self.meteo = reads.drop(['WGHT',target], axis=1)
+        #self.meteo = reads.drop(['WGHT',target], axis=1)
+        self.meteo = reads[['MNT','MKT', 'PAD', 'VLZ', 'MBV', 'RBD']]
         self.weights = reads['WGHT']
         self.labels = reads[target]
         self.k = k

@@ -64,7 +64,6 @@ def load_data(file_name, preproc = 'lognormalize',target='PRAM', nr_sim = 0, use
     if nr_sim > 0:
         for nd in range(nr_sim):
             listOfColumns.append(f"{nd}-sim")
-        
     data = data[listOfColumns]
     
     # pomaknuti temperaturu
@@ -72,19 +71,11 @@ def load_data(file_name, preproc = 'lognormalize',target='PRAM', nr_sim = 0, use
     trainvalid_dataset, test_dataset = train_test_split(data, target, locations = ['NS'], test_years=[2015,2016])
     train_dataset, valid_dataset = train_test_split(trainvalid_dataset, target, locations = ['NS'], test_years = [2013,2014])
 
-
-    #train_dataset = takeSeasons(train_dataset, 'PRAM')
-    #valid_dataset = takeSeasons(valid_dataset, 'PRAM')
-    #test_dataset = takeSeasons(test_dataset, 'PRAM')
-    
-    #train_pram = train_dataset['PRAM']
-    #valid_pram = valid_dataset['PRAM']
-    #test_pram = test_dataset['PRAM']
-    
-    listOfColumns=['MNT','MKT', 'PAD', 'VLZ', 'MBV', 'RBD', target]
-    if nr_sim > 0:
-        for nd in range(nr_sim):
-            listOfColumns.append(f"{nd}-sim")
+    listOfColumns = [el for el in listOfColumns if el not in ['GOD', 'LOK', 'MSC']]
+    #listOfColumns=['MNT','MKT', 'PAD', 'VLZ', 'MBV', 'RBD', target]
+    #if nr_sim > 0:
+    #    for nd in range(nr_sim):
+    #        listOfColumns.append(f"{nd}-sim")
                 
     train_dataset_mnt = train_dataset['MSC']
     train_dataset = train_dataset[listOfColumns]
@@ -112,9 +103,6 @@ def load_data(file_name, preproc = 'lognormalize',target='PRAM', nr_sim = 0, use
         valid_dataset = normalize_stari(valid_dataset, train_min, train_max)
         test_dataset = normalize_stari(test_dataset, train_min, train_max)
 
-    #train_dataset['PRAM'] = train_pram
-    #valid_dataset['PRAM'] = valid_pram
-    #test_dataset['PRAM'] = test_pram
     train_dataset['MSC'] = train_dataset_mnt
     valid_dataset['MSC'] = valid_dataset_mnt
     test_dataset['MSC'] = test_dataset_mnt
@@ -127,10 +115,10 @@ def load_data(file_name, preproc = 'lognormalize',target='PRAM', nr_sim = 0, use
     valid_dataset = valid_dataset.reset_index()
     test_dataset = test_dataset.reset_index()
     
-    listOfColumns=['MNT','MKT', 'PAD', 'VLZ', 'MBV', 'RBD', target]    
-    if nr_sim > 0:
-        for nd in range(nr_sim):
-            listOfColumns.append(f"{nd}-sim")
+    #listOfColumns=['MNT','MKT', 'PAD', 'VLZ', 'MBV', 'RBD', target]    
+    #if nr_sim > 0:
+    #    for nd in range(nr_sim):
+    #        listOfColumns.append(f"{nd}-sim")
     train_dataset = train_dataset[listOfColumns]
     valid_dataset = valid_dataset[listOfColumns]
     test_dataset = test_dataset[listOfColumns]
@@ -149,4 +137,4 @@ def load_data(file_name, preproc = 'lognormalize',target='PRAM', nr_sim = 0, use
 if __name__ == "__main__":
     TARGET = 'PRAM'
     #train_dataset, valid_dataset, test_dataset = load_data('real_for_all_podaci_novo.csv', target=TARGET)
-    train_dataset, valid_dataset, test_dataset = load_data('sim-2-real_for_all_podaci_novo.csv', TARGET, True, 2)
+    train_dataset, valid_dataset, test_dataset = load_data(f'sim-2-{TARGET}-real_for_all_podaci_novo.csv', 'lognormalize', TARGET,  2, True)

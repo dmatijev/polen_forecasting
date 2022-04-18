@@ -9,7 +9,7 @@ from model import Net
 # ugly to have it as globals, but don't care for now...
 
 batch_size = 32 
-nr_sim = 10 # number of simulated sets
+nr_sim = 30 # number of simulated sets
 
 seq_len = 3 # input sequence lenght
 epochs = 50
@@ -17,7 +17,8 @@ lr_rate=0.005
 hidd_dim = 512
 #hidd_dim2 = 1024
 att = True
-nr_days = 1 # number of forcasting days
+nr_days = 2 # number of forcasting days
+dataFile = f'sim-{nr_sim}-PRAM-real_for_all_podaci_novo.csv'
 
 use_weights = False # MSE loss function either uses weights or it does not
 use_model = 'multiple_models_sim_data' # ['single_model_orig_data', 'multiple_models_sim_data', 'single_model_sim_data']
@@ -30,7 +31,7 @@ if use_model == 'single_model_sim_data':
     
     
 
-def train(model, train_loader, valid_loader, test_loader, loss_fn, optimizer, scheduler, device, target):
+def train(model, train_loader, valid_loader, test_loader, loss_fn, optimizer, scheduler, device, target, saveModelPath):
 
 
     bestLoss = 1e9
@@ -46,9 +47,7 @@ def train(model, train_loader, valid_loader, test_loader, loss_fn, optimizer, sc
 
             model.zero_grad()
 
-            
             output = model(inputs, meteo)#, h)
-
 
             loss = loss_fn(output.squeeze(), labels.squeeze(), weights.squeeze())
 
@@ -73,7 +72,7 @@ def train(model, train_loader, valid_loader, test_loader, loss_fn, optimizer, sc
         print(f"Epoch {i}: total VALID loss: {valid_epoch_loss/len(valid_loader)}")
         if valid_epoch_loss/len(valid_loader) < bestLoss:
             print('best model found, saving...')
-            torch.save(model.state_dict(), f'models/{target}/batch_size_{batch_size}-seq_len_{seq_len}-nr_days_{nr_days}-lr_{lr_rate}-hidd_dim_{hidd_dim}-att_{att}_best_meteo.weights')
+            torch.save(model.state_dict(), saveModelPath)
             bestLoss = valid_epoch_loss/len(valid_loader)
         
 
@@ -93,7 +92,7 @@ if __name__ == "__main__":
         device = torch.device("cpu")
 
 
-    train_data, val_data, test_data = load_data('sim-10-real_for_all_podaci.csv', preproc='lognormalize', target=TARGET, nr_sim = nr_sim, use_weights=use_weights)
+    train_data, val_data, test_data = load_data(dataFile, preproc='lognormalize', target=TARGET, nr_sim = nr_sim, use_weights=use_weights)
          
     #loss_fn = torch.nn.MSELoss(reduction='mean') # squared error loss
     loss_fn = weighted_mse_loss(reduction='mean') 
@@ -116,15 +115,13 @@ if __name__ == "__main__":
     
         optimizer = torch.optim.Adam(model.parameters(), lr=lr_rate)
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=10, factor=.3, threshold=1e-4)
-    
-        train(model, train_loader, val_loader, test_loader, loss_fn, optimizer, scheduler, device=device, target=TARGET)
+        savePath = f'models/{TARGET}/batch_size_{batch_size}-seq_len_{seq_len}-nr_days_{nr_days}-lr_{lr_rate}-hidd_dim_{hidd_dim}-att_{att}_best_meteo.weights'
+        train(model, train_loader, val_loader, test_loader, loss_fn, optimizer, scheduler, device=device, target=TARGET, saveModelPath = savePath)
     
     elif use_model == 'multiple_models_sim_data': # train nr_sim different models
 
     
         for i in range(nr_sim):
-            import pdb
-            pdb.set_trace()
             train_dataset = Dataset(train_data, seq_len, nr_days, f'{i}-sim')
             val_dataset = Dataset(val_data, seq_len, nr_days, TARGET)
             test_dataset = Dataset(test_data, seq_len, nr_days, TARGET)
@@ -140,8 +137,8 @@ if __name__ == "__main__":
             model.to(device)
             optimizer = torch.optim.Adam(model.parameters(), lr=lr_rate)
             scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=10, factor=.3, threshold=1e-4)
-   
-            train(model, train_loader, val_loader, test_loader, loss_fn, optimizer, scheduler, device=device, target=f'{i}-sim')
+            savePath = f'models/{TARGET}/simModels/{i}-sim/batch_size_{batch_size}-seq_len_{seq_len}-nr_days_{nr_days}-lr_{lr_rate}-hidd_dim_{hidd_dim}-att_{att}_best_meteo.weights'
+            train(model, train_loader, val_loader, test_loader, loss_fn, optimizer, scheduler, device=device, target=f'{i}-sim', saveModelPath = savePath)
             
     elif use_model == 'single_model_sim_data': # train single model on multiple simulated datasets
         pass
