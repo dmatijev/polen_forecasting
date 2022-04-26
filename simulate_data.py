@@ -47,11 +47,17 @@ if __name__ == "__main__":
     
     for i in range(R):
         data[f'{i}-sim'] = 0
+    data['WGHT'] = 1 #where stDev is 0, weight remains 1
         
     print ("Simulating datasets... ")
     for i in tqdm.tqdm(range(data_rows)):
         targetValue = data.iloc[i, data.columns == target].item()
-        data.iloc[i, data_cols:data_cols + R] = [targetValue]*R + np.random.normal(0, (targetValue*getDeviation(targetValue))/3, R) #normal distribution, the values less than three standard deviations account for 99.73%
+        stDev = (targetValue*getDeviation(targetValue))/3 #normal distribution, the values less than three standard deviations account for 99.73%
+        data.iloc[i, data_cols:data_cols + R] = [targetValue]*R + np.random.normal(0, 2*stDev, R)
+        if stDev != 0:
+            data.iloc[i, data_cols + R] = 1/(2*stDev) #data_cols + R is 'WGHT' column
+        #else:
+        #    data.iloc[i, data_cols + R] = 100 #stdev is=0 weight should be large to penalize differences
         
     
     print(f"saving new datsets to sim-{R}-{target}-{data_file}  ", end ="")

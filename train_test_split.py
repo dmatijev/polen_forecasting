@@ -60,7 +60,7 @@ def takeSeasons(dataset, target):
 
 def load_data(file_name, preproc = 'lognormalize',target='PRAM', nr_sim = 0, use_weights = False):
     data = pd.read_csv(file_name)
-    listOfColumns=['MNT','MKT', 'PAD', 'VLZ', 'MBV', 'RBD', target,  'GOD', 'LOK', 'MSC']
+    listOfColumns=['MNT','MKT', 'PAD', 'VLZ', 'MBV', 'RBD', target,  'GOD', 'LOK', 'MSC', 'WGHT']
     if nr_sim > 0:
         for nd in range(nr_sim):
             listOfColumns.append(f"{nd}-sim")
@@ -71,12 +71,16 @@ def load_data(file_name, preproc = 'lognormalize',target='PRAM', nr_sim = 0, use
     trainvalid_dataset, test_dataset = train_test_split(data, target, locations = ['NS'], test_years=[2015,2016])
     train_dataset, valid_dataset = train_test_split(trainvalid_dataset, target, locations = ['NS'], test_years = [2013,2014])
 
-    listOfColumns = [el for el in listOfColumns if el not in ['GOD', 'LOK', 'MSC']]
+    listOfColumns = [el for el in listOfColumns if el not in ['GOD', 'LOK', 'MSC', 'WGHT']]
     #listOfColumns=['MNT','MKT', 'PAD', 'VLZ', 'MBV', 'RBD', target]
     #if nr_sim > 0:
     #    for nd in range(nr_sim):
     #        listOfColumns.append(f"{nd}-sim")
                 
+    train_dataset_wght = train_dataset['WGHT']
+    valid_dataset_wght = valid_dataset['WGHT']
+    test_dataset_wght = test_dataset['WGHT']
+    
     train_dataset_mnt = train_dataset['MSC']
     train_dataset = train_dataset[listOfColumns]
 
@@ -85,7 +89,8 @@ def load_data(file_name, preproc = 'lognormalize',target='PRAM', nr_sim = 0, use
 
     test_dataset_mnt = test_dataset['MSC']
     test_dataset = test_dataset[listOfColumns]
-
+    
+    
     train_min = train_dataset.min()
     train_max = train_dataset.max()
     train_mean = train_dataset.mean()
@@ -106,7 +111,11 @@ def load_data(file_name, preproc = 'lognormalize',target='PRAM', nr_sim = 0, use
     train_dataset['MSC'] = train_dataset_mnt
     valid_dataset['MSC'] = valid_dataset_mnt
     test_dataset['MSC'] = test_dataset_mnt
+    train_dataset['WGHT'] = train_dataset_wght
+    valid_dataset['WGHT'] = valid_dataset_wght
+    test_dataset['WGHT'] = test_dataset_wght
 
+    
     train_dataset = takeSeasons(train_dataset, target)
     valid_dataset = takeSeasons(valid_dataset, target)
     test_dataset = takeSeasons(test_dataset, target)
@@ -119,16 +128,18 @@ def load_data(file_name, preproc = 'lognormalize',target='PRAM', nr_sim = 0, use
     #if nr_sim > 0:
     #    for nd in range(nr_sim):
     #        listOfColumns.append(f"{nd}-sim")
+    listOfColumns.append('WGHT')
     train_dataset = train_dataset[listOfColumns]
     valid_dataset = valid_dataset[listOfColumns]
     test_dataset = test_dataset[listOfColumns]
+
 
     if not use_weights: # all weights are set to 1
         train_dataset['WGHT'] = pd.Series(np.ones(train_dataset.shape[0]))
         valid_dataset['WGHT'] = pd.Series(np.ones(valid_dataset.shape[0]))
         test_dataset['WGHT'] = pd.Series(np.ones(test_dataset.shape[0]))
-    else:
-        pass # TODO SLOBODAN, load_data shold return weights (variances) !!!
+    #else:
+    #    pass # TODO SLOBODAN, load_data shold return weights (variances) !!!
     
  
     return train_dataset, valid_dataset, test_dataset
