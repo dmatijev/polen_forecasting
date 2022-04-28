@@ -2,18 +2,19 @@ import torch
 from torch.utils.data import DataLoader
 from train_test_split import load_data
 from data_set import Dataset
-from data_set import Dataset_smsd 
+from data_set import Dataset_SMSD 
 from data_set import  weighted_mse_loss
 #import numpy as np
 from model import Net
+import tqdm
 
 # ugly to have it as globals, but don't care for now...
 
-batch_size = 1
+batch_size = 32
 nr_sim = 30 # number of simulated sets
 
 seq_len = 3 # input sequence lenght
-epochs = 50
+epochs = 10
 lr_rate=0.001
 hidd_dim = 512
 #hidd_dim2 = 1024
@@ -22,7 +23,7 @@ nr_days = 2 # number of forcasting days
 dataFile = f'sim-{nr_sim}-PRAM-real_for_all_podaci_novo.csv'
 
 use_weights = False # MSE loss function either uses weights or it does not
-use_model = 'multiple_models_sim_data' # ['single_model_orig_data', 'multiple_models_sim_data', 'single_model_sim_data']
+use_model = 'single_model_sim_data' # ['single_model_orig_data', 'multiple_models_sim_data', 'single_model_sim_data']
 
 if use_model == 'single_model_orig_data':
     nr_sim = 0 # 0 indicated that the original (and not simulated) data should be used
@@ -32,7 +33,7 @@ if use_model == 'single_model_sim_data':
     
     
 
-def train(model, train_loader, valid_loader, test_loader, loss_fn, optimizer, scheduler, device, target, saveModelPath):
+def train(model, train_loader, valid_loader, test_loader, loss_fn, optimizer, scheduler, device,  saveModelPath):
 
 
     bestLoss = 1e9
@@ -43,12 +44,19 @@ def train(model, train_loader, valid_loader, test_loader, loss_fn, optimizer, sc
 
         model.train()
         #h = model.init_hidden(batch_size, device)
-        for (inputs, meteo, labels, weights) in train_loader:
+        for (inputs, meteo, labels, weights) in tqdm.tqdm(train_loader):
+            
             inputs, meteo, labels, weights= inputs.to(device), meteo.to(device), labels.to(device), weights.to(device)
             model.zero_grad()
-            import pdb
-            pdb.set_trace()
-            output = model(inputs, meteo)#, h)
+            
+            if use_model == 'single_model_sim_data':
+                inputs = torch.squeeze(inputs, dim=0)
+                shared_weights = True
+            else:
+                shared_weights = False
+
+                
+            output = model(inputs, meteo, shared_weights = shared_weights)
             
             loss = loss_fn(output.squeeze(), labels.squeeze(), weights.squeeze())
 
@@ -65,6 +73,7 @@ def train(model, train_loader, valid_loader, test_loader, loss_fn, optimizer, sc
         valid_epoch_loss = 0
         for (inputs, meteo, labels, weights) in valid_loader:
             inputs, meteo, labels, weights = inputs.to(device), meteo.to(device), labels.to(device), weights.to(device) 
+            
             output = model(inputs, meteo)#, h)
             loss = loss_fn(output.squeeze(), labels.squeeze(), weights.squeeze())                      
 
@@ -129,13 +138,13 @@ if __name__ == "__main__":
         #optimizer = torch.optim.SGD(model.parameters(), lr=lr_rate, weight_decay=0.01, momentum=0.9)
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=3, factor=.3, threshold=1e-6)
         savePath = f'models/{TARGET}/batch_size_{batch_size}-seq_len_{seq_len}-nr_days_{nr_days}-lr_{lr_rate}-hidd_dim_{hidd_dim}-att_{att}_useWeights_{use_weights}_best_meteo.weights'
-        train(model, train_loader, val_loader, test_loader, loss_fn, optimizer, scheduler, device=device, target=TARGET, saveModelPath = savePath)
+        train(model, train_loader, val_loader, test_loader, loss_fn, optimizer, scheduler, device=device, saveModelPath = savePath)
     
     elif use_model == 'multiple_models_sim_data': # train nr_sim different models
 
         
         for i in range(nr_sim):
-            train_dataset = Dataset(train_data, seq_len, nr_days, TARGET, nr_sim = f'{i}-sim')            
+            train_dataset = Dataset(train_data, seq_len, nr_days, TARGET, sim_label = f'{i}-sim')            
 
             input_dim = train_dataset[0][0].shape[1]
             train_loader = DataLoader(train_dataset, shuffle=True, batch_size=batch_size)
@@ -148,7 +157,17 @@ if __name__ == "__main__":
             train(model, train_loader, val_loader, test_loader, loss_fn, optimizer, scheduler, device=device, target=f'{i}-sim', saveModelPath = savePath)
             
     elif use_model == 'single_model_sim_data': # train single model on multiple simulated datasets
-        pass
+        train_dataset = Dataset_SMSD(train_data, seq_len, nr_days, TARGET, nr_sim = nr_sim)
+        input_dim = train_dataset[0][0].shape[2]
+        train_loader = DataLoader(train_dataset, shuffle=True, batch_size=batch_size)
+         
+        model = Net(input_dim,  hidden_dim = hidd_dim, nr_days = nr_days, seq_len = seq_len, attention = att, device = device) 
+        model.to(device)
+        optimizer = torch.optim.AdamW(model.parameters(), lr=lr_rate, weight_decay=0.001)
+        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=3, factor=.3, threshold=1e-6)
+        savePath = f'models/{TARGET}/SMSD/batch_size_{batch_size}-seq_len_{seq_len}-nr_days_{nr_days}-lr_{lr_rate}-hidd_dim_{hidd_dim}-att_{att}_useWeights_{use_weights}_best_meteo.weights'
+        
+        train(model, train_loader, val_loader, test_loader, loss_fn, optimizer, scheduler, device=device,  saveModelPath = savePath)
                 
     else:
         raise Exception("use_model should be set to either of ['single_model_orig_data', 'multiple_models_sim_data', 'single_model_sim_data']")
