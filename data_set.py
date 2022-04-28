@@ -23,10 +23,10 @@ def weighted_mse_loss(reduction):
         raise Exception("reduction flag should be set to either 'mean' or 'sum' ")
 
 class Dataset(data.Dataset):
-    def __init__(self, reads, k, nr_days, target):
+    def __init__(self, reads, k, nr_days, target, nr_sim = ''):
         super().__init__()
-        self.reads = reads.drop(['WGHT'], axis=1)
-        #self.meteo = reads.drop(['WGHT',target], axis=1)
+        #self.reads = reads.drop(['WGHT'], axis=1)
+        self.reads = reads[['MNT','MKT', 'PAD', 'VLZ', 'MBV', 'RBD', f"{target if nr_sim == '' else nr_sim}"]]
         self.meteo = reads[['MNT','MKT', 'PAD', 'VLZ', 'MBV', 'RBD']]
         self.weights = reads['WGHT']
         self.labels = reads[target]
@@ -36,20 +36,12 @@ class Dataset(data.Dataset):
 
 
     def __getitem__(self, index):
-        """
-         implement taking k-plets at index position. Label is the polen 
-         forcast at index + (k+1) position
-         k_plet format is seq_len times input_dim
-         meteo data is used for decoding
-        """
-     
-        
-        k_plet = self.reads[index: index + self.k]
+        inputs = self.reads[index: index + self.k]
         meteo = self.meteo[index+self.k:index+self.k+self.nr_days]
         label = self.labels[index+self.k : index+self.k+self.nr_days]
         weights = self.weights[index+self.k : index+self.k+self.nr_days]
    
-        return torch.tensor(k_plet.to_numpy(), dtype = torch.float32), \
+        return torch.tensor(inputs.to_numpy(), dtype = torch.float32), \
                torch.tensor(meteo.to_numpy(), dtype=torch.float32), \
                torch.tensor(label.to_numpy(), dtype = torch.float32), \
                torch.tensor(weights.to_numpy(), dtype = torch.float32)
