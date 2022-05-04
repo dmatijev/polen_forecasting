@@ -28,7 +28,7 @@ class Net(nn.Module):
         self.device = device
         self.input_dim = input_dim
         
-    def forward(self, x, meteo, shared_weights = "False"):# hidden):    
+    def forward(self, x, meteo, shared_weights = False):# hidden):    
 
         all_hidden_states, hidden = self.lstm(x)#, hidden)
 
