@@ -45,7 +45,7 @@ class Net(nn.Module):
         all_encoder_states, hidden = self.lstm(x)#, hidden)
 
         encoder_out = hidden[0].contiguous().view(-1, self.hidden_dim) # take only the last hidden state
-        cx = hidden[0].contiguous().view(-1, self.hidden_dim)    
+        cx = hidden[1].contiguous().view(-1, self.hidden_dim)    
 
         if shared_weights:
             encoder_out = torch.mean(encoder_out, 0, True)
