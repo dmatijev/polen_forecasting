@@ -1,22 +1,32 @@
 import torch
 import torch.nn as nn
 
-class Attention1(nn.Module):
-    def __init__(self, hidden_dim):
+class Attention(nn.Module):
+    def __init__(self, hidden_dim, dropout = 0.25):
         super().__init__()
-        self.W = nn.Linear(hidden_dim, hidden_dim) # linear combination coefficients (i.e. attention weights)
+        self.W1 = nn.Linear(hidden_dim, hidden_dim) # linear combination coefficients (i.e. attention weights)
+        self.W2 = nn.Linear(2*hidden_dim, hidden_dim)
+        self.softmax = nn.Softmax(dim = 1)
+        self.dropout = nn.Dropout(0.25)
+        self.tanh = nn.Tanh()
         self.hidden_dim = hidden_dim
 
     def forward(self, hx, encoder_states): # dimension 
-        att_weights = torch.bmm(encoder_states, self.W(hx).unsqueeze(2)).squeeze(2)        
-        return att_weights
+        att_weights = torch.bmm(encoder_states, self.W1(hx).unsqueeze(2)).squeeze(2)      
+        att_weights = self.softmax(att_weights)
+        at = torch.bmm(att_weights.unsqueeze(1), encoder_states)
+        ut = torch.cat((at.squeeze(1), hx), dim = 1)
+        vt = self.W2(ut)
+        ot = self.dropout(self.tanh(vt))
+        
+        return att_weights, ot
         
     
 
 
-class Net1(nn.Module):
+class Net(nn.Module):
     def __init__(self, input_dim, hidden_dim, seq_len, nr_days = 1, n_layers=1, attention = False, device = torch.device("cpu")):
-        super(Net1, self).__init__()
+        super(Net, self).__init__()
         self.lstm = nn.LSTM(input_size = input_dim, hidden_size = hidden_dim, num_layers = n_layers, bias=True, batch_first=True)
         self.fc = nn.Linear(hidden_dim, 1)
         self.lstm_cell = nn.LSTMCell(6, hidden_dim) # 6 different meteo data
@@ -24,7 +34,7 @@ class Net1(nn.Module):
         self.n_layers = n_layers
         self.hidden_dim = hidden_dim
         self.use_attention_layer = attention
-        self.attention = Attention1(hidden_dim)
+        self.attention = Attention(hidden_dim)
         self.nr_days = nr_days
         self.device = device
         self.input_dim = input_dim
@@ -45,17 +55,14 @@ class Net1(nn.Module):
         out = []
         for i in range(self.nr_days): # start decoding
             hx, cx = self.lstm_cell(meteo[:,i,:], (hx, cx))
-            Hx = self.attention(hx, all_encoder_states) # TODO IMPLEMENT THIS
-            # ux = [hx, Hx]
-            # vx = W*ux
-            # ox = dropout(tanh(vx)) \in R^h
-            # out.append(self.fc(ox))
-            
+            if self.use_attention_layer:
+                att_weights, hx = self.attention(hx, all_encoder_states) # TODO IMPLEMENT THIS
+
             out.append(self.fc(hx))
 
         return torch.cat(out, dim = 1)
  
-
+"""
 
 class Attention(nn.Module):
     def __init__(self, input_dim):
@@ -109,4 +116,4 @@ class Net(nn.Module):
 
         return torch.cat(out, dim = 1)
  
-
+"""
