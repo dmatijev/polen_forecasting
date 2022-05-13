@@ -7,7 +7,7 @@ class Attention(nn.Module):
         self.W1 = nn.Linear(hidden_dim, hidden_dim) # linear combination coefficients (i.e. attention weights)
         self.W2 = nn.Linear(2*hidden_dim, hidden_dim)
         self.softmax = nn.Softmax(dim = 1)
-        self.dropout = nn.Dropout(0.25)
+        self.dropout = nn.Dropout(dropout)
         self.tanh = nn.Tanh()
         self.hidden_dim = hidden_dim
 
