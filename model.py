@@ -49,6 +49,7 @@ class Net(nn.Module):
 
         if shared_weights:
             encoder_out = torch.mean(encoder_out, 0, True)
+            all_encoder_states = torch.mean(all_encoder_states, 0, True) 
         
         hx = encoder_out
         cx = torch.zeros(encoder_out.shape).to(self.device)
