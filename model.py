@@ -40,19 +40,22 @@ class Net(nn.Module):
         self.input_dim = input_dim
         
     def forward(self, x, meteo, shared_weights = False):# hidden):    
-
+        
  
         all_encoder_states, hidden = self.lstm(x)#, hidden)
 
         encoder_out = hidden[0].contiguous().view(-1, self.hidden_dim) # take only the last hidden state
-            
+        cx = hidden[0].contiguous().view(-1, self.hidden_dim)    
 
         if shared_weights:
             encoder_out = torch.mean(encoder_out, 0, True)
+            cx = torch.mean(cx, 0, True)
             all_encoder_states = torch.mean(all_encoder_states, 0, True) 
+            
         
         hx = encoder_out
-        cx = torch.zeros(encoder_out.shape).to(self.device)
+
+        #cx = torch.zeros(encoder_out.shape).to(self.device)
         out = []
         for i in range(self.nr_days): # start decoding
             hx, cx = self.lstm_cell(meteo[:,i,:], (hx, cx))
