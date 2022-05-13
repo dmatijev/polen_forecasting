@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 
 class Attention(nn.Module):
-    def __init__(self, hidden_dim, dropout = 0.25):
+    def __init__(self, hidden_dim, dropout):
         super().__init__()
         self.W1 = nn.Linear(hidden_dim, hidden_dim) # linear combination coefficients (i.e. attention weights)
         self.W2 = nn.Linear(2*hidden_dim, hidden_dim)
@@ -25,7 +25,7 @@ class Attention(nn.Module):
 
 
 class Net(nn.Module):
-    def __init__(self, input_dim, hidden_dim, seq_len, nr_days = 1, n_layers=1, attention = False, device = torch.device("cpu")):
+    def __init__(self, input_dim, hidden_dim, seq_len, nr_days = 1, n_layers=1, dropout = 0.25, attention = False, device = torch.device("cpu")):
         super(Net, self).__init__()
         self.lstm = nn.LSTM(input_size = input_dim, hidden_size = hidden_dim, num_layers = n_layers, bias=True, batch_first=True)
         self.fc = nn.Linear(hidden_dim, 1)
@@ -34,7 +34,7 @@ class Net(nn.Module):
         self.n_layers = n_layers
         self.hidden_dim = hidden_dim
         self.use_attention_layer = attention
-        self.attention = Attention(hidden_dim)
+        self.attention = Attention(hidden_dim, dropout)
         self.nr_days = nr_days
         self.device = device
         self.input_dim = input_dim
@@ -56,10 +56,11 @@ class Net(nn.Module):
         out = []
         for i in range(self.nr_days): # start decoding
             hx, cx = self.lstm_cell(meteo[:,i,:], (hx, cx))
+            ot = hx
             if self.use_attention_layer:
-                att_weights, hx = self.attention(hx, all_encoder_states) # TODO IMPLEMENT THIS
+                att_weights, ot = self.attention(hx, all_encoder_states) # TODO IMPLEMENT THIS
 
-            out.append(self.fc(hx))
+            out.append(self.fc(ot))
 
         return torch.cat(out, dim = 1)
  
