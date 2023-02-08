@@ -17,6 +17,6 @@ python main.py
 After training the model, you can evaluate it using iPython notebooks evaluate_model.ipynb (for single model with original data and single model with simulated data models) and evaluate_multipleModels.ipynb (for multiple models with simulated data). Again, you shoud change parameters and path file to match trained model.
 
 In those notebook you can generate graphs showing real and predicted values, such as:
-<p align="center"><img src="https://github.com/dmatijev/polen_forcasting/tree/blob/main/images/real_predicted_2020_2021_SMSD.jpg?raw=true" width="350" ></p>
+<p align="center"><img src="https://github.com/dmatijev/polen_forcasting/blob/main/images/real_predicted_2020_2021_SMSD.jpg?raw=true" width="350" ></p>
 
 <!--Koliko u sirinu ici? Trebam li napisati da imamo 3 modela, da imamo attention? Treba li pisati i sto je u kojem fileu? npr. da se pomocu simulate data simuliraju podaci za SMSD i MMSD? -->
