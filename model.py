@@ -21,9 +21,6 @@ class Attention(nn.Module):
         
         return att_weights, ot
         
-    
-
-
 class Net(nn.Module):
     def __init__(self, input_dim, hidden_dim, seq_len, nr_days = 1, n_layers=1, dropout = 0.25, attention = False, device = torch.device("cpu")):
         super(Net, self).__init__()
@@ -66,7 +63,7 @@ class Net(nn.Module):
             out.append(self.fc(ot))
 
         return torch.cat(out, dim = 1)
- 
+
 """
 
 class Attention(nn.Module):

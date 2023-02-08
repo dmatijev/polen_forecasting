@@ -9,7 +9,6 @@ import pandas as pd
 from math import log
 import numpy as np
 
-#data = pd.read_csv('real_for_all_podaci.csv')
 
 def train_test_split(data, target, locations = ['NS'], test_years = [2015,2016]):
     data = data[data['LOK'].isin(locations)]
@@ -50,32 +49,23 @@ def takeSeasons(dataset, target):
         dataset = dataset[dataset['MSC'].isin([4,5,6,7,8,9,10])]
     
     return dataset
-    
-
-# TRAIN SET: 2000-2013
-# VALID SET: 2014-2015
-#  TEST SET: 2016-2017
-# TARGET: PRAM (AMBROZIJA)
 
 
-def load_data(file_name, preproc = 'lognormalize',target='PRAM', nr_sim = 0, use_weights = False):
+def load_data(file_name, test_years=[2015, 2016], valid_years=[2013,2014], exclude_years=[2017, 2018, 2019, 2020, 2021], preproc = 'lognormalize',target='PRAM', nr_sim = 0, use_weights = False):
     data = pd.read_csv(file_name)
+    data=data[~data['GOD'].isin(exclude_years)] #remove years not needed for training, validation and testing
     listOfColumns=['MNT','MKT', 'PAD', 'VLZ', 'MBV', 'RBD', target,  'GOD', 'LOK', 'MSC', 'WGHT']
     if nr_sim > 0:
         for nd in range(nr_sim):
             listOfColumns.append(f"{nd}-sim")
     data = data[listOfColumns]
     
-    # pomaknuti temperaturu
+    # move temperature so that values are greater than 0 (because of the logarithm)
     data[['MKT', 'MNT']] = (data[['MKT', 'MNT']] + 40)/90.0
-    trainvalid_dataset, test_dataset = train_test_split(data, target, locations = ['NS'], test_years=[2015,2016])
-    train_dataset, valid_dataset = train_test_split(trainvalid_dataset, target, locations = ['NS'], test_years = [2013,2014])
+    trainvalid_dataset, test_dataset = train_test_split(data, target, locations = ['NS'], test_years=test_years)
+    train_dataset, valid_dataset = train_test_split(trainvalid_dataset, target, locations = ['NS'], test_years = valid_years)
 
     listOfColumns = [el for el in listOfColumns if el not in ['GOD', 'LOK', 'MSC', 'WGHT']]
-    #listOfColumns=['MNT','MKT', 'PAD', 'VLZ', 'MBV', 'RBD', target]
-    #if nr_sim > 0:
-    #    for nd in range(nr_sim):
-    #        listOfColumns.append(f"{nd}-sim")
                 
     train_dataset_wght = train_dataset['WGHT']
     valid_dataset_wght = valid_dataset['WGHT']
@@ -124,10 +114,6 @@ def load_data(file_name, preproc = 'lognormalize',target='PRAM', nr_sim = 0, use
     valid_dataset = valid_dataset.reset_index()
     test_dataset = test_dataset.reset_index()
     
-    #listOfColumns=['MNT','MKT', 'PAD', 'VLZ', 'MBV', 'RBD', target]    
-    #if nr_sim > 0:
-    #    for nd in range(nr_sim):
-    #        listOfColumns.append(f"{nd}-sim")
     listOfColumns.append('WGHT')
     train_dataset = train_dataset[listOfColumns]
     valid_dataset = valid_dataset[listOfColumns]
@@ -138,8 +124,6 @@ def load_data(file_name, preproc = 'lognormalize',target='PRAM', nr_sim = 0, use
         train_dataset['WGHT'] = pd.Series(np.ones(train_dataset.shape[0]))
         valid_dataset['WGHT'] = pd.Series(np.ones(valid_dataset.shape[0]))
         test_dataset['WGHT'] = pd.Series(np.ones(test_dataset.shape[0]))
-    #else:
-    #    pass # TODO SLOBODAN, load_data shold return weights (variances) !!!
     
  
     return train_dataset, valid_dataset, test_dataset
@@ -147,5 +131,4 @@ def load_data(file_name, preproc = 'lognormalize',target='PRAM', nr_sim = 0, use
 
 if __name__ == "__main__":
     TARGET = 'PRAM'
-    #train_dataset, valid_dataset, test_dataset = load_data('real_for_all_podaci_novo.csv', target=TARGET)
-    train_dataset, valid_dataset, test_dataset = load_data(f'sim-2-{TARGET}-real_for_all_podaci_novo.csv', 'lognormalize', TARGET,  2, True)
+    train_dataset, valid_dataset, test_dataset = load_data(f'sim-30-{TARGET}-jump_weights-real_for_all_NS_2000_2021.csv', [2015,2016], [2013_2014], [2017, 2018,2019,2020,2021], 'lognormalize', TARGET,  2, True)

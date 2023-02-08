@@ -25,7 +25,6 @@ def weighted_mse_loss(reduction):
 class Dataset(data.Dataset):
     def __init__(self, reads, k, nr_days, target, sim_label = ''):
         super().__init__()
-        #self.reads = reads.drop(['WGHT'], axis=1)
         self.reads = reads[['MNT','MKT', 'PAD', 'VLZ', 'MBV', 'RBD', f"{target if sim_label == '' else sim_label}"]]
         self.meteo = reads[['MNT','MKT', 'PAD', 'VLZ', 'MBV', 'RBD']]
         self.weights = reads['WGHT']
@@ -53,7 +52,6 @@ class Dataset(data.Dataset):
 class Dataset_SMSD(data.Dataset):
     def __init__(self, reads, k, nr_days, target, nr_sim):
         super().__init__()
-        #self.reads = reads.drop(['WGHT'], axis=1)
         columns = ['MNT','MKT', 'PAD', 'VLZ', 'MBV', 'RBD']
         self.meteo = reads[columns]
         columns.extend([f'{i}-sim' for i in range(nr_sim)])
