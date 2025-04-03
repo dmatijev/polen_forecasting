@@ -1,5 +1,22 @@
 # Pollen forecasting using PollenNet
 
+## Software License
+The software in this repository is licensed under the [MIT License](LICENSE).
+
+## Data License
+The data in this repository is licensed under the [Creative Commons Attribution-NonCommercial 4.0 International License (CC BY-NC 4.0)](LICENSE).
+
+Please be sure to provide appropriate attribution if you use the data, and note that the data cannot be used for commercial purposes.
+
+## Citation
+If you use the data from this repository in your research, please cite the following paper:
+
+**[Rebeka Čorić, Domagoj Matijević, Darija Marković]**. "[PollenNet - a deep learning approach to predicting airborne pollen concentrations]." *[Croatian Operational Research Review]*, vol. [14], no. [1], [2023], [http://dx.doi.org/10.17535/crorr.2023.0001]. 
+
+Please make sure to give appropriate credit to the original authors.
+
+## Description
+
 This repository contains code for training the RNN network, whose primary goal is forecasting day-by-day pollen concentration. 
 This repository is supplementary material for the paper "PollenNet - a deep learning approach for predicting airborne pollen concentrations".
 
