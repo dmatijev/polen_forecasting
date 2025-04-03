@@ -1,0 +1,21 @@
+RA – rain (yes/no, i.e., 1/0)
+SN – snow (1/0)
+TS – thunderstorm (1/0)
+FG – fog (1/0)
+MBV – maximum wind speed
+SBV – average wind speed
+PAD – precipitation
+VLZ – air humidity
+ATT – atmospheric pressure
+MNT – minimum daily temperature
+MKT – maximum daily temperature
+SRT – average daily temperature
+GOD – year
+MSC – month
+DAN – day
+RBD – day of the year (ordinal day number)
+LOK – location
+PRAM – average concentration of ragweed
+PRBR – average concentration of birch
+PRTR – average concentration of grass
+DAT – date
