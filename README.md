@@ -11,7 +11,7 @@ Please be sure to provide appropriate attribution if you use the data, and note 
 ## Citation
 If you use the data from this repository in your research, please cite the following paper:
 
-**[Rebeka Čorić, Domagoj Matijević, Darija Marković]**. "[PollenNet - a deep learning approach to predicting airborne pollen concentrations]." *[Croatian Operational Research Review]*, vol. [14], no. [1], [2023], [http://dx.doi.org/10.17535/crorr.2023.0001]. 
+**Rebeka Čorić, Domagoj Matijević, Darija Marković**. "PollenNet - a deep learning approach to predicting airborne pollen concentrations." *Croatian Operational Research Review*, vol. 14, no. 1, 2023, http://dx.doi.org/10.17535/crorr.2023.0001. 
 
 Please make sure to give appropriate credit to the original authors.
 
